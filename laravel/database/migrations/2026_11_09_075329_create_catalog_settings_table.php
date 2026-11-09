@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -27,17 +26,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::table('catalog_settings')->insert([
-            'key' => 'lab.catalog',
-            'label' => 'Lab catalog',
-            'description' => 'Cho phép learner nhìn thấy catalog các business-logic lab.',
-            'group' => 'Learning shell',
-            'implemented' => true,
-            'default_enabled' => false,
-            'enabled' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
 
     }
 

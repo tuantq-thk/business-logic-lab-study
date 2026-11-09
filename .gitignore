@@ -25,3 +25,28 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# General macOS system files
+.DS_Store
+.localized
+__MACOSX/
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails and shadow files
+._*
+
+# Files that may appear on external disks / network shares
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.fseventsd
+
+# Remote AFP share directories
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk

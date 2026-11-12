@@ -22,6 +22,19 @@ class AdminCatalogSeeder extends Seeder
             ],
         );
 
+        foreach (config('labs.registry', []) as $lab) {
+            CatalogSetting::query()->updateOrCreate(
+                ['key' => $lab['key']],
+                [
+                    'label' => $lab['label'],
+                    'description' => $lab['description'],
+                    'group' => $lab['group'],
+                    'implemented' => $lab['implemented'],
+                    'default_enabled' => $lab['default_enabled'],
+                ],
+            );
+        }
+
         $adminEmail = config('catalog.admin.email');
         $adminPassword = config('catalog.admin.password');
 

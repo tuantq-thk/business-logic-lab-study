@@ -28,15 +28,29 @@
             </div>
             <section class="mt-12 rounded-2xl border border-dashed border-slate-300 bg-white p-8">
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
+                    <div class="w-full">
                         @if ($catalogSetting->isEnabled())
                             <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Catalog đang bật</span>
                             <h2 class="mt-4 text-xl font-semibold">Catalog đã được mở</h2>
-                            <p class="mt-2 max-w-xl text-sm leading-6 text-slate-500">Catalog feature đã enabled, nhưng lab registry thật chưa được kết nối. Không hiển thị dữ liệu mẫu.</p>
+                            <p class="mt-2 max-w-xl text-sm leading-6 text-slate-500">Chỉ những lab đã implemented và enabled mới xuất hiện trong menu.</p>
+                            @if (count($labs) > 0)
+                                <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                                    @foreach ($labs as $lab)
+                                        <a href="{{ route('labs.show', $lab->key) }}" class="rounded-xl border border-slate-200 p-5 transition hover:border-cyan-300 hover:shadow-sm">
+                                            <p class="font-mono text-xs text-cyan-700">{{ $lab->key }}</p>
+                                            <h3 class="mt-2 font-semibold">{{ $lab->label }}</h3>
+                                            <p class="mt-2 text-sm leading-6 text-slate-500">{{ $lab->description }}</p>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="mt-6 rounded-xl border border-dashed border-slate-300 px-4 py-5 text-sm text-slate-500">Chưa có lab khả dụng.</p>
+                            @endif
                         @else
                             <span class="inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">Catalog đang tắt</span>
                             <h2 class="mt-4 text-xl font-semibold">Catalog chưa được mở</h2>
                             <p class="mt-2 max-w-xl text-sm leading-6 text-slate-500">Admin có thể bật catalog khi registry và evidence của lab đã sẵn sàng.</p>
+                            <p class="mt-6 rounded-xl border border-dashed border-slate-300 px-4 py-5 text-sm text-slate-500">Các lab không được hiển thị và direct URL cũng bị backend chặn.</p>
                         @endif
                     </div>
                     <span class="font-mono text-xs text-slate-400">source: {{ $catalogSetting->stateSource() }}</span>

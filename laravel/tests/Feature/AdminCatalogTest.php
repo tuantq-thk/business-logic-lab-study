@@ -21,6 +21,10 @@ test('a learner cannot access catalog administration', function () {
     $this->actingAs(User::factory()->create())
         ->get('/admin/catalog')
         ->assertForbidden();
+
+    $this->actingAs(User::factory()->create())
+        ->patch('/admin/catalog/labs/state-transition', ['enabled' => false])
+        ->assertForbidden();
 });
 
 test('an admin can toggle the catalog and the learner shell reflects effective state', function () {
@@ -29,7 +33,9 @@ test('an admin can toggle the catalog and the learner shell reflects effective s
     $this->actingAs($admin)
         ->get('/admin/catalog')
         ->assertOk()
-        ->assertSee('Bật hoặc tắt catalog');
+        ->assertSee('Bật hoặc tắt catalog')
+        ->assertSee('State transition &amp; invariant', false)
+        ->assertSee('Inventory, reservation &amp; capacity', false);
 
     $this->actingAs($admin)
         ->patch('/admin/catalog', [
@@ -51,10 +57,60 @@ test('an admin can toggle the catalog and the learner shell reflects effective s
         ->assertSee('Catalog đang bật');
 });
 
+test('an admin can toggle an implemented lab while the catalog remains enabled', function () {
+    $admin = createAdminUser();
+    $learner = User::factory()->create();
+
+    $this->actingAs($admin)
+        ->patch('/admin/catalog', ['enabled' => true])
+        ->assertRedirect('/admin/catalog');
+
+    $this->actingAs($admin)
+        ->patch('/admin/catalog/labs/state-transition', [
+            'enabled' => false,
+            'reason' => 'Evidence cần review lại.',
+        ])
+        ->assertRedirect('/admin/catalog');
+
+    $this->assertDatabaseHas('catalog_settings', [
+        'key' => 'lab.catalog',
+        'enabled' => true,
+    ]);
+    $this->assertDatabaseHas('catalog_settings', [
+        'key' => 'state-transition',
+        'enabled' => false,
+        'last_changed_by' => $admin->id,
+        'reason' => 'Evidence cần review lại.',
+    ]);
+
+    $this->actingAs($learner)
+        ->get('/home')
+        ->assertOk()
+        ->assertDontSee('state-transition');
+
+    $this->actingAs($learner)
+        ->get('/labs/state-transition')
+        ->assertNotFound();
+});
+
+test('an admin cannot enable an unimplemented lab', function () {
+    $admin = createAdminUser();
+
+    $this->actingAs($admin)
+        ->patch('/admin/catalog/labs/inventory-capacity', ['enabled' => true])
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('catalog_settings', [
+        'key' => 'inventory-capacity',
+        'enabled' => null,
+    ]);
+});
+
 test('the admin catalog seeder is idempotent and leaves the catalog disabled by default', function () {
     $this->seed(AdminCatalogSeeder::class);
 
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->count())->toBe(1);
+    expect(CatalogSetting::query()->whereIn('key', ['state-transition', 'inventory-capacity'])->count())->toBe(2);
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->isEnabled())->toBeFalse();
 });
 

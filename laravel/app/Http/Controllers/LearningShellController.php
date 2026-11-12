@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CatalogSetting;
+use App\Services\LabCatalog;
 use Illuminate\View\View;
 
 class LearningShellController extends Controller
 {
-    public function index(): View
+    public function index(LabCatalog $catalog): View
     {
-        $catalogSetting = CatalogSetting::query()
-            ->where('key', CatalogSetting::CATALOG_KEY)
-            ->firstOrFail();
+        $catalogSetting = $catalog->catalogSetting();
+        $labs = $catalog->visible();
 
-        return view('home', compact('catalogSetting'));
+        return view('home', compact('catalogSetting', 'labs'));
     }
 }

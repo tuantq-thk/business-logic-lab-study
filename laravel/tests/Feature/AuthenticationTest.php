@@ -1,17 +1,10 @@
 <?php
 
-use App\Models\CatalogSetting;
 use App\Models\User;
+use Database\Seeders\AdminCatalogSeeder;
 
 beforeEach(function () {
-    CatalogSetting::forceCreate([
-        'key' => CatalogSetting::CATALOG_KEY,
-        'label' => 'Lab catalog',
-        'description' => 'Catalog fixture for the authentication shell.',
-        'group' => 'Learning shell',
-        'implemented' => true,
-        'default_enabled' => false,
-    ]);
+    $this->seed(AdminCatalogSeeder::class);
 });
 
 test('the public shell exposes authentication entry points', function () {

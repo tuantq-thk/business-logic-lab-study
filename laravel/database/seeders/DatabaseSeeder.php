@@ -24,5 +24,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(StateTransitionSeeder::class);
+        $this->call(PricingDiscountsSeeder::class);
     }
 }

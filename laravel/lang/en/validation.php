@@ -5,6 +5,10 @@ return [
     'string' => 'The :attribute field must be a string.',
     'max' => [
         'string' => 'The :attribute field may not be greater than :max characters.',
+        'array' => 'The :attribute field may not have more than :max items.',
+    ],
+    'size' => [
+        'array' => 'The :attribute field must contain exactly :size items.',
     ],
     'integer' => 'The :attribute field must be an integer.',
     'min' => [

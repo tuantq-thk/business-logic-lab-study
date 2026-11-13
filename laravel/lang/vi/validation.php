@@ -5,6 +5,10 @@ return [
     'string' => 'Trường :attribute phải là chuỗi ký tự.',
     'max' => [
         'string' => 'Trường :attribute không được dài hơn :max ký tự.',
+        'array' => 'Trường :attribute không được có quá :max phần tử.',
+    ],
+    'size' => [
+        'array' => 'Trường :attribute phải có đúng :size phần tử.',
     ],
     'integer' => 'Trường :attribute phải là số nguyên.',
     'min' => [

@@ -111,12 +111,14 @@ test('the admin catalog seeder is idempotent and leaves the catalog disabled by 
     $this->seed(AdminCatalogSeeder::class);
 
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->count())->toBe(1);
-    expect(CatalogSetting::query()->whereIn('key', ['state-transition', 'inventory-capacity'])->count())->toBe(2);
+    expect(CatalogSetting::query()->whereIn('key', ['state-transition', 'pricing-discounts', 'inventory-capacity'])->count())->toBe(3);
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->isEnabled())->toBeFalse();
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->label_key)
         ->toBe('catalog.global.label');
     expect(CatalogSetting::query()->where('key', 'state-transition')->first()->label_key)
         ->toBe('labs.state_transition.label');
+    expect(CatalogSetting::query()->where('key', 'pricing-discounts')->first()->label_key)
+        ->toBe('labs.pricing_discounts.label');
 });
 
 test('the admin catalog seeder can bootstrap an admin from configured credentials', function () {

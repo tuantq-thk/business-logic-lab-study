@@ -13,4 +13,10 @@ return [
         'group' => 'Capacity',
         'question' => 'Làm sao ngăn bán vượt tồn khi nhiều request cùng chạy?',
     ],
+    'pricing_discounts' => [
+        'label' => 'Giá, giảm giá và thứ tự áp dụng',
+        'description' => 'Học cách tính tiền xác định, làm tròn và chọn các rule giảm giá.',
+        'group' => 'Giá và khuyến mãi',
+        'question' => 'Làm sao để quote luôn đúng khi có nhiều rule giảm giá cùng đủ điều kiện?',
+    ],
 ];

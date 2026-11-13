@@ -8,6 +8,7 @@ return [
     ],
     'title' => 'Admin catalog · Business Logic Lab',
     'brand' => 'Admin · Catalog',
+    'promotions_link' => 'Manage promotions',
     'eyebrow' => 'Admin control / feature catalog',
     'heading' => 'Enable or disable the catalog',
     'description' => 'The catalog is the master switch. Each implemented lab also has its own runtime toggle; the backend checks both states before allowing access.',

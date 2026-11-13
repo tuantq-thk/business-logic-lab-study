@@ -13,4 +13,10 @@ return [
         'group' => 'Capacity',
         'question' => 'How do we prevent overselling when requests run concurrently?',
     ],
+    'pricing_discounts' => [
+        'label' => 'Pricing, discounts & order of application',
+        'description' => 'Learn how deterministic money rules choose, round and apply discounts.',
+        'group' => 'Pricing',
+        'question' => 'How can a quote remain correct when several discount rules apply?',
+    ],
 ];

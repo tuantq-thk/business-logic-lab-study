@@ -13,6 +13,17 @@ return [
             'toggleable' => true,
             'route_names' => ['labs.state-transition.index'],
         ],
+        'pricing-discounts' => [
+            'key' => 'pricing-discounts',
+            'label_key' => 'labs.pricing_discounts.label',
+            'description_key' => 'labs.pricing_discounts.description',
+            'group_key' => 'labs.pricing_discounts.group',
+            'question_key' => 'labs.pricing_discounts.question',
+            'implemented' => true,
+            'default_enabled' => true,
+            'toggleable' => true,
+            'route_names' => ['labs.pricing-discounts.index'],
+        ],
         'inventory-capacity' => [
             'key' => 'inventory-capacity',
             'label_key' => 'labs.inventory_capacity.label',

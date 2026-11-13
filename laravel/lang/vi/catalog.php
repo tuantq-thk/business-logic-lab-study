@@ -8,6 +8,7 @@ return [
     ],
     'title' => 'Admin catalog · Business Logic Lab',
     'brand' => 'Admin · Catalog',
+    'promotions_link' => 'Quản lý promotion',
     'eyebrow' => 'Admin control / feature catalog',
     'heading' => 'Bật hoặc tắt catalog',
     'description' => 'Catalog là master switch. Mỗi lab implemented có thêm runtime toggle riêng; backend sẽ kiểm tra cả hai trạng thái trước khi cho phép truy cập.',

@@ -15,10 +15,13 @@
             </div>
         </header>
         <main class="mx-auto max-w-5xl px-5 py-12 sm:px-8">
-            <div class="max-w-2xl">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+                <div class="max-w-2xl">
                 <p class="font-mono text-xs uppercase tracking-[0.25em] text-cyan-700">{{ __('catalog.eyebrow') }}</p>
                 <h1 class="mt-4 text-4xl font-semibold tracking-[-0.04em]">{{ __('catalog.heading') }}</h1>
                 <p class="mt-4 text-base leading-7 text-slate-600">{{ __('catalog.description') }}</p>
+                </div>
+                <a href="{{ route('labs.pricing-discounts.index') }}" class="rounded-lg border border-cyan-200 px-3 py-2 text-sm font-semibold text-cyan-700 hover:border-cyan-400 hover:text-cyan-900">{{ __('catalog.promotions_link') }}</a>
             </div>
             @if (session('status'))<div role="status" class="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</div>@endif
             @if ($errors->any())<div role="alert" class="mt-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ $errors->first() }}</div>@endif

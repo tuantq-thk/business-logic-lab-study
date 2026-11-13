@@ -135,7 +135,7 @@ BL-00 giữ ở application-level shared folders vì catalog/learning shell là 
 
 ## 7. Evidence và giới hạn
 
-BL-00 có feature tests cho catalog visibility/admin behavior và locale/key persistence. Verification chung đã pass: full Pest 38 tests / 230 assertions trên SQLite và MySQL, registry translation validation, migration up/down trên SQLite, route list, Pint, Vite build và `git diff --check`.
+BL-00 có feature tests cho catalog visibility/admin behavior và locale/key persistence. Verification suite hiện tại đã pass: full Pest 61 tests / 341 assertions trên SQLite và MySQL, bao gồm registry translation validation và BL-02 route; migration up/down trên SQLite, route list, Pint, Vite build và `git diff --check` cũng đã pass.
 
 Chưa nằm trong scope:
 

@@ -243,8 +243,8 @@ Evidence:
 
 | Kiểm tra | Kết quả |
 |---|---|
-| Pest SQLite | 38 tests, 230 assertions passed |
-| Pest MySQL `laravel-test` | 38 tests, 230 assertions passed |
+| Pest SQLite | 61 tests, 341 assertions passed |
+| Pest MySQL `laravel-test` | 61 tests, 341 assertions passed |
 | MySQL migrate fresh + seed | Passed |
 | Route resolution | Passed; route gọi feature controller `changeStatus` |
 | Pint | Passed |

@@ -37,3 +37,4 @@
 
 - [BL-00 — Catalog visibility toggle implementation](technical/BL-00-implementation.md)
 - [BL-01 — State transition implementation](technical/BL-01-implementation.md)
+- [BL-02 — Pricing and discounts implementation](technical/BL-02-implementation.md)

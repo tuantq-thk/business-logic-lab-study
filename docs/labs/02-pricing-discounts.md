@@ -2,14 +2,14 @@
 
 > **Domain minh họa:** Giỏ hàng đặt mua sách  
 > **Nhóm:** pricing / discounts  
-> **Trạng thái:** kế hoạch phân tích; chưa phải evidence triển khai  
+> **Trạng thái:** implemented locally; evidence-backed sau khi chạy verification ghi dưới đây
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
 ## 1. Tóm tắt và phạm vi
 
 **Bài toán:** Làm sao tính tổng tiền xác định được khi nhiều rule giảm giá cùng đủ điều kiện?
 
-**Phạm vi:** một use case cốt lõi và các trường hợp biên dưới đây. **Ngoài phạm vi:** UI sản phẩm hoàn chỉnh, tích hợp provider thật, multi-tenant phức tạp hoặc abstraction tổng quát trừ khi lab cần để chứng minh rule. Domain chỉ là phương tiện học; không dùng entity của lab khác nếu không có quan hệ nghiệp vụ thật.
+**Phạm vi:** một use case cốt lõi và các trường hợp biên dưới đây, có form quote tương tác server-side. **Ngoài phạm vi:** UI sản phẩm hoàn chỉnh, tích hợp provider thật, multi-tenant phức tạp hoặc abstraction tổng quát trừ khi lab cần để chứng minh rule. Domain chỉ là phương tiện học; không dùng entity của lab khác nếu không có quan hệ nghiệp vụ thật.
 
 **Actor:** Người mua; hệ thống pricing; quản trị viên cấu hình promotion.
 
@@ -43,10 +43,11 @@ Trước khi code, lập decision table nối mỗi scenario với rule ID, expe
 
 | Bảng | Field gợi ý | Ý nghĩa và bảo vệ rule |
 |---|---|---|
-| `products` | `id, sku unique, name, unit_price_minor, currency, active` | giá hiện hành; minor unit chỉ hợp lệ khi currency/exponent được định nghĩa. |
-| `orders` | `id, currency, subtotal_minor, discount_minor, total_minor, pricing_version` | snapshot tổng và chính sách. |
-| `order_lines` | `id, order_id, product_id nullable, sku_snapshot, quantity, unit_price_minor, discount_minor, line_total_minor` | snapshot để lịch sử không đổi theo catalog. |
-| `promotions` | `id, code nullable unique, kind, value, starts_at, ends_at, active` | chỉ lưu loại rule được scope hỗ trợ. |
+| `pricing_products` | `id, sku unique, name_key, unit_price_minor, currency, active` | giá hiện hành; minor unit chỉ hợp lệ khi currency/exponent được định nghĩa. |
+| `pricing_promotions` | `id, code unique, kind, value, minimum_subtotal_minor, priority, stackable, starts_at, ends_at, active` | policy promotion hiện hành và cửa sổ hiệu lực. |
+| `pricing_quotes` | `id, created_by, currency, subtotal_minor, discount_minor, total_minor` | snapshot tổng tại thời điểm quote. |
+| `pricing_quote_lines` | `quote_id, product_id nullable, sku_snapshot, name_snapshot, quantity, unit_price_minor, line_total_minor` | giữ lịch sử dù product đổi giá/tên hoặc bị xóa. |
+| `pricing_quote_discounts` | `quote_id, promotion_id nullable, code_snapshot, discount_minor` | giữ rule và discount thực sự đã áp dụng. |
 
 ### Relationship và source of truth
 
@@ -54,7 +55,7 @@ Mô hình phải giữ rõ aggregate sở hữu invariant. Với lab này, bản
 
 ## 5. Migration plan (Laravel + MySQL định hướng)
 
-Dùng BIGINT signed/unsigned có giới hạn hợp lý cho amount minor; quantity integer dương. FK line→order; index promotion code và thời hạn. Nếu nhiều currency, currency code bắt buộc; không cộng số tiền khác currency. Check constraints có thể bổ sung cho quantity/amount nếu MySQL version được chốt và migration test xác nhận.
+Dùng BIGINT unsigned cho amount minor; quantity integer dương. FK quote→line cascade, snapshot→product/promotion null-on-delete; unique promotion code và index cửa sổ hiệu lực. Nếu nhiều currency, currency code bắt buộc; không cộng số tiền khác currency. Check constraints có thể bổ sung khi DB version/policy được chốt.
 
 **Thứ tự migration:** tạo bảng gốc trước, child/history sau; FK và unique constraint được thêm cùng schema ban đầu nếu dữ liệu mới. Với bảng đã có dữ liệu, tách expand → backfill → enforce constraint khi deployment cần zero/low downtime. `down()` cần được cân nhắc theo khả năng mất dữ liệu; rollback schema không đồng nghĩa rollback business event. Viết migration/integration test trên MySQL cho constraint phụ thuộc engine; không suy luận từ SQLite.
 
@@ -62,7 +63,7 @@ Dùng BIGINT signed/unsigned có giới hạn hợp lý cho amount minor; quanti
 
 ### Model và ranh giới logic
 
-`Money` value object (amount + currency) hoặc integer minor trong MVP; `PriceQuote` immutable DTO; `Promotion` mô tả policy; `PriceCart` pure domain service. Eloquent Models persistence, không để model event tự tính giá ngầm.
+`Money` value object, `PriceQuote` immutable DTO, Eloquent Models cho catalog/snapshot; calculation không đặt trong model event.
 
 ### Factory
 
@@ -70,22 +71,29 @@ ProductFactory dùng giá nguyên và currency rõ; PromotionFactory states perc
 
 ### Seeder
 
-Demo catalog có 3 sản phẩm; promotion đủ điều kiện, hết hạn, xung đột và minimum subtotal. Seed fixed dates qua clock/frozen time trong tests.
+Seeder hiện có 2 product và 3 promotion: hai rule stackable, một rule exclusive và minimum subtotal. Factory hỗ trợ tạo product/promotion fixtures; expired/window-bound scenarios được dựng riêng trong test.
 
 Factory phục vụ fixture test, Seeder phục vụ demo/khởi tạo dữ liệu phát triển; không trộn hai mục đích. Factory phải tạo trạng thái nhất quán, còn scenario bất hợp lệ nên được dựng có chủ đích trong test để không vô tình dùng như dữ liệu hợp lệ.
 
 ## 7. Cấu trúc code gợi ý
 
 ```text
-app/
-├── Http/Requests/PricingDiscounts/...
-├── Http/Controllers/PricingDiscounts/...
-├── Models/...
-├── Policies/...                 # nếu action cần authorization
-├── Actions/PricingDiscounts/...
-├── Domain/PricingDiscounts/ # pure rules/value objects nếu giúp rõ
-├── Jobs/                         # chỉ khi có async work
-└── Events/                       # chỉ khi event có consumer/use case
+laravel/app/Features/PricingDiscounts/
+├── Catalog/PricingCatalog.php
+├── Actions/CalculateCartQuote.php
+├── Actions/BuildPricingQuote.php
+├── Actions/CreatePricingQuote.php
+├── Models/PricingProduct.php
+├── Models/PricingPromotion.php
+├── Models/PricingQuote*.php
+├── Enums/DiscountKind.php
+├── Http/Requests/QuoteCartRequest.php
+├── Http/Controllers/PricingDiscountsController.php
+└── ValueObjects/
+    ├── CartLine.php
+    ├── DiscountRule.php
+    ├── Money.php
+    └── PriceQuote.php
 ```
 
 | Thành phần | Trách nhiệm | Tránh làm |
@@ -101,7 +109,7 @@ app/
 
 ## 8. Luồng xử lý và thuật toán
 
-`HTTP input → authenticate → authorize → validate shape → load authoritative state → evaluate business policy → transaction/constraint → persist outcome/history → dispatch side effect after commit → map result`
+`HTTP request → auth + lab availability middleware → validate → load DB catalog → calculate pure quote → persist snapshot (POST) → PRG/render`
 
 ### Thuật toán tham chiếu
 
@@ -183,5 +191,19 @@ Mỗi extension phải thêm rule và acceptance test riêng; không thêm field
 5. Thêm use case, authorization và transaction boundary.
 6. Bổ sung integration/concurrency/failure tests phù hợp.
 7. Tạo UI/API demo, docs chạy/reset và ghi evidence.
+
+### BL-02 đã triển khai
+
+1. Chốt policy MVP: minor units dạng integer, percentage half-up, rule threshold theo subtotal, stackable áp tuần tự theo priority; exclusive cạnh tranh với kết quả stacked và chọn discount lớn hơn.
+2. Tạo immutable value objects `Money`, `CartLine`, `DiscountRule`, `PriceQuote` và enum `DiscountKind` trong feature module.
+3. Tạo `CalculateCartQuote` làm application action thuần, không phụ thuộc Eloquent hay request.
+4. Thêm demo route/UI, registry metadata, runtime catalog gate và translation `vi`/`en`.
+5. Thêm form tương tác: quantity từng line, chọn/bỏ promotion và POST server-side để tính lại quote.
+6. Thêm nhiều promotion scenario (`SAVE300`, `BULK15`) và preset UI cho small/stacking/exclusive flow.
+7. Thêm recent quote history và quote snapshot detail có actor scope.
+8. Thêm Admin Promotion CRUD với validation code/type/value/window và preserve quote snapshots khi xóa promotion.
+9. Viết unit test cho subtotal, rounding, threshold, stacking/exclusion, zero floor và mixed currency; feature test cho route enabled/disabled, valid quote, validation error, locale, DB snapshot, actor scope, repeated quotes và admin permission matrix.
+
+Persistence của product/promotion catalog và quote snapshot đã thuộc BL-02 MVP. Admin CRUD promotion đã thuộc scope; product admin CRUD, checkout reprice, payment provider, usage limit và concurrency chưa thuộc scope; không claim đã triển khai.
 
 **DoD:** không đánh dấu complete khi thiếu rule, test evidence, trade-off hoặc giới hạn quan trọng.

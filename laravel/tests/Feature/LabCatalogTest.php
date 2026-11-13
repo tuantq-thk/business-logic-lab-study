@@ -2,7 +2,9 @@
 
 use App\Models\CatalogSetting;
 use App\Models\User;
+use App\Services\LabCatalog;
 use Database\Seeders\AdminCatalogSeeder;
+use Illuminate\Support\Facades\App;
 
 beforeEach(function () {
     $this->seed(AdminCatalogSeeder::class);
@@ -16,12 +18,12 @@ test('an enabled implemented lab is rendered in the catalog and can be opened', 
         ->get('/home')
         ->assertOk()
         ->assertSee('state-transition')
-        ->assertSee(route('labs.show', 'state-transition'));
+        ->assertSee(route('labs.state-transition.index'));
 
     $this->actingAs($learner)
-        ->get(route('labs.show', 'state-transition'))
+        ->get(route('labs.state-transition.index'))
         ->assertOk()
-        ->assertSee('State transition &amp; invariant', false);
+        ->assertSee('Theo dõi tiến độ phiếu hỗ trợ');
 });
 
 test('a disabled catalog blocks every lab menu entry and direct URL', function () {
@@ -33,7 +35,7 @@ test('a disabled catalog blocks every lab menu entry and direct URL', function (
         ->assertDontSee('state-transition');
 
     $this->actingAs($learner)
-        ->get(route('labs.show', 'state-transition'))
+        ->get(route('labs.state-transition.index'))
         ->assertNotFound();
 });
 
@@ -49,7 +51,7 @@ test('a disabled lab is hidden and blocked while the catalog remains enabled', f
         ->assertDontSee('state-transition');
 
     $this->actingAs($learner)
-        ->get(route('labs.show', 'state-transition'))
+        ->get(route('labs.state-transition.index'))
         ->assertNotFound();
 });
 
@@ -57,7 +59,7 @@ test('an unknown lab key is rejected', function () {
     CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
 
     $this->actingAs(User::factory()->create())
-        ->get('/labs/does-not-exist')
+        ->get('/catalog/labs/does-not-exist')
         ->assertNotFound();
 });
 
@@ -70,6 +72,36 @@ test('an unimplemented lab is not exposed or reachable', function () {
         ->assertDontSee('inventory-capacity');
 
     $this->actingAs(User::factory()->create())
-        ->get('/labs/inventory-capacity')
+        ->get('/catalog/labs/inventory-capacity')
         ->assertNotFound();
+});
+
+test('catalog metadata follows the active application locale', function () {
+    CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
+    $learner = User::factory()->create();
+    $defaultLocale = App::getLocale();
+
+    try {
+        foreach (['vi', 'en'] as $locale) {
+            App::setLocale($locale);
+
+            $response = $this->actingAs($learner)->get('/home')->assertOk();
+            $definition = app(LabCatalog::class)->find('state-transition');
+
+            expect($definition)->not->toBeNull();
+
+            if ($locale === 'vi') {
+                $response->assertSee('Học cách bảo vệ trạng thái hợp lệ khi một workflow thay đổi.');
+                expect(__($definition->questionKey))
+                    ->toBe('Rule nào ngăn một ticket chuyển sang trạng thái không hợp lệ?');
+            } else {
+                $response->assertSee('Learn how to protect valid state changes in a workflow.');
+                $response->assertDontSee('Học cách bảo vệ trạng thái hợp lệ khi một workflow thay đổi.');
+                expect(__($definition->questionKey))
+                    ->toBe('What rule prevents a ticket from moving to an invalid state?');
+            }
+        }
+    } finally {
+        App::setLocale($defaultLocale);
+    }
 });

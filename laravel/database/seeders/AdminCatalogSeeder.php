@@ -14,9 +14,9 @@ class AdminCatalogSeeder extends Seeder
         CatalogSetting::query()->updateOrCreate(
             ['key' => CatalogSetting::CATALOG_KEY],
             [
-                'label' => 'Lab catalog',
-                'description' => 'Cho phép learner nhìn thấy catalog các business-logic lab.',
-                'group' => 'Learning shell',
+                'label_key' => 'catalog.global.label',
+                'description_key' => 'catalog.global.description',
+                'group_key' => 'catalog.global.group',
                 'implemented' => true,
                 'default_enabled' => false,
             ],
@@ -26,9 +26,9 @@ class AdminCatalogSeeder extends Seeder
             CatalogSetting::query()->updateOrCreate(
                 ['key' => $lab['key']],
                 [
-                    'label' => $lab['label'],
-                    'description' => $lab['description'],
-                    'group' => $lab['group'],
+                    'label_key' => $lab['label_key'],
+                    'description_key' => $lab['description_key'],
+                    'group_key' => $lab['group_key'],
                     'implemented' => $lab['implemented'],
                     'default_enabled' => $lab['default_enabled'],
                 ],

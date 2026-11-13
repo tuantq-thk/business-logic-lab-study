@@ -4,15 +4,25 @@ namespace App\Services;
 
 use App\Models\CatalogSetting;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Lang;
 use RuntimeException;
 
 class LabCatalog
 {
     /**
+     * @var array<string, LabDefinition>|null
+     */
+    private ?array $cachedRegistry = null;
+
+    /**
      * @return array<string, LabDefinition>
      */
     public function registry(): array
     {
+        if ($this->cachedRegistry !== null) {
+            return $this->cachedRegistry;
+        }
+
         $definitions = [];
 
         foreach (config('labs.registry', []) as $key => $attributes) {
@@ -20,10 +30,24 @@ class LabCatalog
                 throw new RuntimeException("Lab registry entry [{$key}] must be an array.");
             }
 
-            $definitions[$key] = LabDefinition::fromConfig($attributes);
+            $definition = LabDefinition::fromConfig($attributes);
+
+            if ($definition->key !== $key) {
+                throw new RuntimeException("Lab registry key [{$key}] does not match definition key [{$definition->key}].");
+            }
+
+            foreach ($definition->translationKeys() as $translationKey) {
+                foreach (config('app.supported_locales', []) as $locale) {
+                    if (! Lang::has($translationKey, $locale)) {
+                        throw new RuntimeException("Missing translation key [{$translationKey}] for locale [{$locale}].");
+                    }
+                }
+            }
+
+            $definitions[$key] = $definition;
         }
 
-        return $definitions;
+        return $this->cachedRegistry = $definitions;
     }
 
     public function find(string $key): ?LabDefinition

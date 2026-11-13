@@ -3,6 +3,7 @@
 use App\Models\CatalogSetting;
 use App\Models\User;
 use Database\Seeders\AdminCatalogSeeder;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 
 function createAdminUser(): User
@@ -89,7 +90,7 @@ test('an admin can toggle an implemented lab while the catalog remains enabled',
         ->assertDontSee('state-transition');
 
     $this->actingAs($learner)
-        ->get('/labs/state-transition')
+        ->get(route('labs.state-transition.index'))
         ->assertNotFound();
 });
 
@@ -112,6 +113,10 @@ test('the admin catalog seeder is idempotent and leaves the catalog disabled by 
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->count())->toBe(1);
     expect(CatalogSetting::query()->whereIn('key', ['state-transition', 'inventory-capacity'])->count())->toBe(2);
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->isEnabled())->toBeFalse();
+    expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->label_key)
+        ->toBe('catalog.global.label');
+    expect(CatalogSetting::query()->where('key', 'state-transition')->first()->label_key)
+        ->toBe('labs.state_transition.label');
 });
 
 test('the admin catalog seeder can bootstrap an admin from configured credentials', function () {
@@ -126,4 +131,25 @@ test('the admin catalog seeder can bootstrap an admin from configured credential
     expect($admin->name)->toBe('Seed Admin');
     expect($admin->role)->toBe(User::ROLE_ADMIN);
     expect(Hash::check('seed-password', $admin->password))->toBeTrue();
+});
+
+test('global catalog metadata and flash messages follow the active locale', function () {
+    $admin = createAdminUser();
+    $defaultLocale = App::getLocale();
+
+    try {
+        App::setLocale('en');
+
+        $this->actingAs($admin)
+            ->get('/admin/catalog')
+            ->assertOk()
+            ->assertSee('Allow learners to see the business-logic lab catalog.');
+
+        $this->actingAs($admin)
+            ->patch('/admin/catalog', ['enabled' => true])
+            ->assertRedirect('/admin/catalog')
+            ->assertSessionHas('status', 'The catalog state was updated.');
+    } finally {
+        App::setLocale($defaultLocale);
+    }
 });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Features\StateTransition\Http\Controllers\StateTransitionController;
 use App\Http\Controllers\Admin\CatalogController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\LearningShellController;
@@ -13,7 +14,20 @@ Route::get('/home', [LearningShellController::class, 'index'])
     ->middleware('auth')
     ->name('dashboard');
 
-Route::get('/labs/{labKey}', [LabController::class, 'show'])
+Route::get('/labs/state-transition', [StateTransitionController::class, 'index'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'state-transition')
+    ->name('labs.state-transition.index');
+Route::post('/labs/state-transition/tickets', [StateTransitionController::class, 'store'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'state-transition')
+    ->name('labs.state-transition.store');
+Route::patch('/labs/state-transition/tickets/{ticket}/transition', [StateTransitionController::class, 'changeStatus'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'state-transition')
+    ->name('labs.state-transition.transition');
+
+Route::get('/catalog/labs/{labKey}', [LabController::class, 'show'])
     ->middleware(['auth', 'lab.available'])
     ->name('labs.show');
 

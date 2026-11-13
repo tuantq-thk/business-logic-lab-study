@@ -35,7 +35,7 @@ class CatalogController extends Controller
             'reason' => $request->string('reason')->trim()->toString() ?: null,
         ]);
 
-        return to_route('admin.catalog.index')->with('status', 'Catalog state đã được cập nhật.');
+        return to_route('admin.catalog.index')->with('status', __('catalog.flash.catalog_updated'));
     }
 
     public function updateLab(UpdateCatalogSettingRequest $request, string $labKey, LabCatalog $catalog): RedirectResponse
@@ -51,6 +51,6 @@ class CatalogController extends Controller
             'reason' => $request->string('reason')->trim()->toString() ?: null,
         ]);
 
-        return to_route('admin.catalog.index')->with('status', "Lab [{$labKey}] state đã được cập nhật.");
+        return to_route('admin.catalog.index')->with('status', __('catalog.flash.lab_updated', ['key' => $labKey]));
     }
 }

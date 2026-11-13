@@ -32,3 +32,8 @@
 - [Template phân tích chuyên sâu](TEMPLATE.md)
 - [UI Guide](UI_GUIDE.md)
 - [Roadmap](PLAN.md)
+
+## Technical implementation records
+
+- [BL-00 — Catalog visibility toggle implementation](technical/BL-00-implementation.md)
+- [BL-01 — State transition implementation](technical/BL-01-implementation.md)

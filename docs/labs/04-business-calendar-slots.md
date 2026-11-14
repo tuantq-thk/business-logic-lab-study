@@ -2,7 +2,7 @@
 
 > **Domain minh họa:** Đặt phòng họp  
 > **Nhóm:** business / calendar / slots  
-> **Trạng thái:** kế hoạch phân tích; chưa phải evidence triển khai  
+> **Trạng thái:** implemented locally; SQLite + MySQL functional evidence đã pass; booking overlap thuộc BL-05
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
 ## 1. Tóm tắt và phạm vi
@@ -11,7 +11,7 @@
 
 **Phạm vi:** một use case cốt lõi và các trường hợp biên dưới đây. **Ngoài phạm vi:** UI sản phẩm hoàn chỉnh, tích hợp provider thật, multi-tenant phức tạp hoặc abstraction tổng quát trừ khi lab cần để chứng minh rule. Domain chỉ là phương tiện học; không dùng entity của lab khác nếu không có quan hệ nghiệp vụ thật.
 
-**Actor:** Người đặt phòng; quản trị viên lịch; service tính availability.
+**Actor trong MVP:** learner xem availability; quản trị viên cung cấp dữ liệu lịch qua seeder; service tính availability. Booking/đặt trùng chưa thuộc BL-04.
 
 ## 2. Quy tắc nghiệp vụ và invariant
 
@@ -147,13 +147,13 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 | Concurrency | Hai connection/process nếu invariant có race | Harness, barriers, số lần lặp, outcome |
 | Async/external | Queue/provider failure/retry nếu áp dụng | Fake/real service, retry configuration, limits |
 
-- [ ] Weekly open/closed weekday; override đóng/mở/thay ca.
-- [ ] Candidate vừa chạm giờ đóng được chấp nhận nếu end==close; vượt một phút bị loại.
-- [ ] Break giữa hai shifts; duration không chia hết step.
-- [ ] Past slots theo frozen clock.
-- [ ] DST gap/overlap nếu product timezone hỗ trợ; nếu không, scope ghi rõ.
+- [x] Weekly open/closed weekday; override đóng/mở/thay ca.
+- [x] Candidate vừa chạm giờ đóng được chấp nhận nếu end==close; vượt một phút bị loại.
+- [x] Break giữa hai shifts; duration không chia hết step.
+- [x] Past slots theo injected clock.
+- [x] DST gap bị từ chối rõ ràng; DST overlap và booking overlap để scope sau.
 
-Đây là **kế hoạch test**, không phải khẳng định tests đã chạy. Khi triển khai cần ghi kết quả, runtime/DB cụ thể và giới hạn. Unit test không chứng minh locking, collation, transaction isolation hay queue driver behavior.
+Evidence hiện tại: 82 tests, 417 assertions passed trên SQLite và MySQL 9.5.0 (`laravel_test`); migration, FK, unique key, CHECK constraint và UI route đã chạy. Chưa claim booking concurrency/overlap vì đó là BL-05; DST ambiguous overlap chưa được chọn policy.
 
 ## 13. Failure modes, edge cases và mở rộng
 
@@ -185,3 +185,21 @@ Mỗi extension phải thêm rule và acceptance test riêng; không thêm field
 7. Tạo UI/API demo, docs chạy/reset và ghi evidence.
 
 **DoD:** không đánh dấu complete khi thiếu rule, test evidence, trade-off hoặc giới hạn quan trọng.
+
+## 16. Implementation map
+
+- `app/Features/BusinessCalendarSlots/Services/SlotGenerator.php`: pure slot generation theo local date/timezone, half-open containment và injected clock.
+- `app/Features/BusinessCalendarSlots/Services/NextAvailableDateFinder.php`: chọn ngày khả dụng gần nhất theo timezone phòng, weekly hours và override.
+- `app/Features/BusinessCalendarSlots/Actions/GenerateRoomSlots.php`: chọn effective weekly windows hoặc date override.
+- `app/Features/BusinessCalendarSlots/Models`: room, weekly opening hours và calendar override.
+- `database/migrations/2026_11_14_100000..100003`: tables, indexes, FK và MySQL checks.
+- `resources/views/labs/business-calendar-slots/index.blade.php`: demo chọn phòng/ngày/duration/step và hiển thị local slots.
+- `tests/Unit/BusinessCalendarSlots/SlotGeneratorTest.php`: boundary, break, past slot và DST gap.
+- `tests/Feature/BusinessCalendarSlots/BusinessCalendarSlotsTest.php`: route, weekly schedule và closed override.
+
+## 17. Verification limits
+
+- `composer test`: 82 tests, 417 assertions trên SQLite in-memory.
+- `composer test:mysql`: 82 tests, 417 assertions trên MySQL 9.5.0 với database `laravel_test`.
+- Chưa có booking table hoặc overlap lock; BL-05 sẽ chịu trách nhiệm chứng minh phần đó.
+- Chưa chọn semantics cho DST ambiguous local time khi đồng hồ lùi; hiện chỉ reject local time không tồn tại trong DST gap.

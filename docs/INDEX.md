@@ -9,7 +9,7 @@
 - [BL-01 — State transition và invariant](labs/01-state-transition.md) — `evidence-backed locally`; phiếu hỗ trợ.
 - [BL-02 — Giá, giảm giá và thứ tự áp dụng](labs/02-pricing-discounts.md) — `evidence-backed locally`; giỏ hàng sách.
 - [BL-03 — Tồn kho, giữ hàng và capacity](labs/03-inventory-capacity.md) — `implemented locally`; SQLite evidence pass, MySQL concurrency pending; kho cửa hàng.
-- [BL-04 — Lịch làm việc, ngày nghỉ và sinh slot](labs/04-business-calendar-slots.md) — phòng họp.
+- [BL-04 — Lịch làm việc, ngày nghỉ và sinh slot](labs/04-business-calendar-slots.md) — `implemented locally`; SQLite + MySQL functional evidence, phòng họp.
 - [BL-05 — Overlap và đặt lịch chống trùng](labs/05-booking-overlap.md) — lịch phòng theo resource.
 - [BL-06 — Validation theo ngữ cảnh nghiệp vụ](labs/06-contextual-validation.md) — đăng ký hội thảo.
 - [BL-07 — Hủy, đổi lịch và chính sách hoàn tác](labs/07-cancellation-rescheduling.md) — đăng ký khóa học.
@@ -45,3 +45,4 @@
 - [BL-01 — State transition implementation](technical/BL-01-implementation.md)
 - [BL-02 — Pricing and discounts implementation](technical/BL-02-implementation.md)
 - [BL-03 — Inventory and capacity implementation](technical/BL-03-implementation.md)
+- [BL-04 — Business calendar and slots implementation](technical/BL-04-implementation.md)

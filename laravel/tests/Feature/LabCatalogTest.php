@@ -99,6 +99,21 @@ test('the business calendar lab is exposed and reachable when enabled', function
         ->assertSee(__('business_calendar_slots.page.heading'));
 });
 
+test('the booking overlap lab is exposed and reachable when enabled', function () {
+    CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
+    $learner = User::factory()->create();
+
+    $this->actingAs($learner)
+        ->get('/home')
+        ->assertOk()
+        ->assertSee('booking-overlap');
+
+    $this->actingAs($learner)
+        ->get(route('labs.booking-overlap.index'))
+        ->assertOk()
+        ->assertSee(__('booking_overlap.slots.title'));
+});
+
 test('catalog metadata follows the active application locale', function () {
     CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
     $learner = User::factory()->create();

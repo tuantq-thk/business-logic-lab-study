@@ -10,7 +10,8 @@
 | BL-00 Catalog & Toggle | implemented locally | Registry source code, DB runtime override, admin gate |
 | BL-01 State transition | evidence-backed locally | Ticket history, transaction, row lock, optimistic version |
 | BL-02 Pricing & discounts | evidence-backed locally | Pure calculation, quote snapshot, promotion CRUD |
-| BL-03 trở đi | planned | Xem tài liệu lab tương ứng, chưa có source implementation |
+| BL-03 Inventory & capacity | implemented locally | SQLite + isolated MySQL functional tests; concurrency harness pending |
+| BL-04 trở đi | planned | Xem tài liệu lab tương ứng, chưa có source implementation |
 
 Chi tiết quyết định và giới hạn nằm ở [technical implementation records](../docs/INDEX.md#technical-implementation-records).
 
@@ -48,6 +49,7 @@ Hoặc cấu hình `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` theo `config/ca
 
 ```bash
 php artisan test --compact
+composer test:mysql # cần database laravel_test trên MySQL
 vendor/bin/pint --dirty --test
 npm run build
 php artisan route:list --except-vendor

@@ -78,7 +78,8 @@ Mục lục và danh sách bài có thể mở rộng theo nhu cầu; README kh�
 | BL-00 Catalog & Toggle | implemented locally | Runtime catalog/admin gate; chưa có append-only toggle audit |
 | BL-01 State transition | evidence-backed locally | Transaction, row lock, optimistic version và stale-conflict harness |
 | BL-02 Pricing & discounts | evidence-backed locally | Pure rules, quote snapshot, promotion CRUD; chưa có checkout/concurrency |
-| BL-03–BL-20 | planned | Chỉ có tài liệu phân tích |
+| BL-03 Inventory & capacity | implemented locally | Functional SQLite tests; MySQL concurrency/EXPLAIN pending |
+| BL-04–BL-20 | planned | Chỉ có tài liệu phân tích |
 
 “Evidence-backed” ở đây nghĩa là claim được kiểm tra trong runtime đã ghi, không có nghĩa production-ready. SQLite không thay thế evidence MySQL cho locking, isolation, index plan hoặc constraint semantics.
 

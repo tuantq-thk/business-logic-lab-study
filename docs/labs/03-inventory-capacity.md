@@ -2,7 +2,7 @@
 
 > **Domain minh họa:** Kho của cửa hàng nhỏ  
 > **Nhóm:** inventory / capacity  
-> **Trạng thái:** kế hoạch phân tích; chưa phải evidence triển khai  
+> **Trạng thái:** implemented locally; SQLite evidence đã pass, MySQL concurrency evidence đang pending
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
 ## 1. Tóm tắt và phạm vi
@@ -11,7 +11,7 @@
 
 **Phạm vi:** một use case cốt lõi và các trường hợp biên dưới đây. **Ngoài phạm vi:** UI sản phẩm hoàn chỉnh, tích hợp provider thật, multi-tenant phức tạp hoặc abstraction tổng quát trừ khi lab cần để chứng minh rule. Domain chỉ là phương tiện học; không dùng entity của lab khác nếu không có quan hệ nghiệp vụ thật.
 
-**Actor:** Khách tạo đơn; hệ thống giữ hàng; nhân viên kho xác nhận/điều chỉnh.
+**Actor trong MVP:** user tạo reservation, admin consume/release/điều chỉnh và system expiry worker. Order/payment provider và nhân viên kho riêng chưa thuộc scope.
 
 ## 2. Quy tắc nghiệp vụ và invariant
 
@@ -136,7 +136,7 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 - PII/secret trong logs, histories, queues và exports phải có purpose, access, retention.
 - Đơn tạo nhưng reservation rollback hoặc ngược lại; worker hết hạn chạy hai lần; update balance không ledger; tồn vật lý khác số hệ thống; lock nhiều SKU theo thứ tự khác gây deadlock.
 
-## 12. Test plan và bằng chứng cần thu
+## 12. Test plan và evidence
 
 | Tầng | Kiểm tra | Evidence cần ghi |
 |---|---|---|
@@ -146,13 +146,13 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 | Concurrency | Hai connection/process nếu invariant có race | Harness, barriers, số lần lặp, outcome |
 | Async/external | Queue/provider failure/retry nếu áp dụng | Fake/real service, retry configuration, limits |
 
-- [ ] Reserve vừa đủ; vượt tồn bị từ chối.
-- [ ] Hai concurrent requests tranh số cuối: chỉ một thành công.
-- [ ] Release/consume lặp không đổi tồn lần hai.
-- [ ] Expiry worker và confirm race: kết quả chỉ một chuyển trạng thái thắng.
-- [ ] Rollback giữ balance và reservation đồng bộ.
+- [x] Reserve vừa đủ; vượt tồn bị từ chối.
+- [ ] Hai concurrent requests tranh số cuối: chỉ một thành công — cần MySQL.
+- [x] Release/consume lặp không đổi tồn lần hai.
+- [x] Expiry/consume lifecycle được kiểm tra tuần tự; race thật cần MySQL.
+- [x] Action transaction giữ balance và reservation đồng bộ trong functional tests.
 
-Đây là **kế hoạch test**, không phải khẳng định tests đã chạy. Khi triển khai cần ghi kết quả, runtime/DB cụ thể và giới hạn. Unit test không chứng minh locking, collation, transaction isolation hay queue driver behavior.
+Evidence hiện tại: 72 tests, 387 assertions passed trên SQLite; migration, InnoDB, foreign key, CHECK constraint, reconciliation và EXPLAIN cơ bản đã được xác nhận trên MySQL 9.5.0. Chưa claim hai-connection concurrency, deadlock retry thực tế hoặc isolation race harness. Chi tiết implementation map và verification limits nằm trong [BL-03 technical record](../technical/BL-03-implementation.md).
 
 ## 13. Failure modes, edge cases và mở rộng
 

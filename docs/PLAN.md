@@ -131,7 +131,7 @@ Các câu hỏi không chặn việc dùng bộ tài liệu này; chúng cần �
 ## 9. Exit criteria của roadmap
 
 - Mỗi lab trong catalog có tài liệu theo template chung; catalog có thể mở rộng.
-- BL-00, BL-01 và BL-02 đã được triển khai end-to-end ở mức local/evidence-backed; trước khi mở rộng tiếp cần giữ technical records và kiểm tra lại các claim engine-specific.
+- BL-00, BL-01 và BL-02 đã được triển khai end-to-end; BL-03 đã có implementation local với SQLite functional evidence. Trước khi mở rộng tiếp cần hoàn tất MySQL concurrency/engine-specific verification cho BL-03.
 - Mỗi tài liệu ghi rõ trạng thái planning vs implemented vs verified.
 - Chỉ claim đã kiểm chứng khi có command, environment, result và limits.
 - Có thể thêm lab mới mà không đổi cấu trúc tất cả bài cũ.

@@ -37,4 +37,5 @@ return [
         'group' => 'Validation và điều kiện tham gia',
         'question' => 'Khi nào input hợp lệ vẫn bị từ chối bởi policy của sự kiện?',
     ],
+    'cancellation_rescheduling' => ['label' => 'Hủy và đổi lịch', 'description' => 'Áp dụng cutoff, capacity, history và rule bù trừ khi đổi khóa học.', 'group' => 'Workflow và bù trừ', 'question' => 'Làm sao đổi đăng ký mà không giải phóng seat hai lần?'],
 ];

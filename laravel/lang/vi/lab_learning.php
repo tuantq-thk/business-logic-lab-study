@@ -67,4 +67,42 @@ return [
         'threat_label' => 'Phân tích tấn công / lỗi', 'threat_title' => 'Tấn công assumption về timezone và boundary', 'threats' => ['Diễn giải room date bằng application timezone', 'Chấp nhận slot vượt closing time', 'Bỏ qua closed override', 'Generate local time không tồn tại hoặc bị lặp trong DST', 'Dùng availability cũ làm booking guarantee'],
         'review_label' => 'Danh sách kiểm tra', 'review_title' => 'Trước khi gọi slot generation đáng tin', 'review' => ['Room timezone là authoritative', 'Override precedence rõ ràng', 'Slot nằm hoàn toàn trong window', 'UTC conversion deterministic', 'Có test DST và boundary', 'Booking check availability lại lúc ghi'],
     ],
+    'cancellation-rescheduling' => [
+        'path_title' => 'Lộ trình đọc đề xuất', 'path_description' => 'Theo registration qua policy, transaction và bù trừ.',
+        'objectives_title' => 'Mục tiêu học tập', 'objectives' => [
+            ['label' => '01 / cutoff', 'title' => 'Xác định biên policy', 'description' => 'Giải thích cutoff loại trừ và quyền override của admin.'],
+            ['label' => '02 / capacity', 'title' => 'Bảo vệ số seat', 'description' => 'Dùng trạng thái mới nhất đã khóa cho cancel và reschedule.'],
+            ['label' => '03 / evidence', 'title' => 'Giữ dấu vết quyết định', 'description' => 'Lưu actor, reason, course cũ/mới và phiên bản policy vào history.'],
+        ],
+        'theory_label' => 'Lý thuyết / mô hình tư duy', 'theory_title' => 'Hủy là đổi state kèm ý định bù trừ', 'theory_description' => 'Registration confirmed chiếm seat. Hủy giải phóng đúng một lần; đổi lịch chỉ chuyển registration sau khi course đích chấp nhận. Refund intent nội bộ được ghi nguyên tử.',
+        'concepts' => [
+            ['title' => 'Cutoff là một instant', 'description' => 'Rule chấp nhận now < cutoff. Tại hoặc sau cutoff, admin có thể hủy đăng ký của attendee khác nếu có reason.'],
+            ['title' => 'Capacity được suy ra', 'description' => 'Row confirmed chiếm seat; cancelled thì không. Số hiển thị chỉ tham khảo cho tới khi khóa course.'],
+            ['title' => 'Bù trừ là bước riêng', 'description' => 'Refund intent commit cùng hủy. Quyết toán provider không nằm trong transaction DB hay implementation này.'],
+        ],
+        'invariant_label' => 'Invariant / quy tắc quyết định', 'invariant_title' => 'Một lần hủy giải phóng một seat và tạo tối đa một refund intent', 'invariant_code' => "status = confirmed\nAND (now < cutoff OR (admin_override AND reason_present))\nAND history_commits_with_state\nAND refund_amount <= amount_paid\nAND one_refund_per_registration", 'invariant_description' => 'Khóa course tuần tự hóa thay đổi capacity. Khóa registration tuần tự hóa cancel/reschedule. Unique constraint chặn ghi trùng.',
+        'flow_label' => 'Luồng code / vòng đời request', 'flow_title' => 'Kiểm tra lại dữ liệu có thể đổi trong biên ghi', 'flow' => [
+            ['title' => 'Validate hình dạng', 'description' => 'Allowlist action, registration id, target bắt buộc khi đổi lịch và reason có giới hạn.'],
+            ['title' => 'Authorize scope', 'description' => 'Attendee có thể hủy/đổi lịch registration của mình; admin có thể hủy registration của attendee khác.'],
+            ['title' => 'Khóa dữ liệu hiện tại', 'description' => 'Khóa course theo id tăng dần, sau đó khóa và kiểm tra lại registration.'],
+            ['title' => 'Áp dụng policy', 'description' => 'Kiểm tra cutoff, state hiện tại, course đích và capacity trước mutation.'],
+            ['title' => 'Commit evidence', 'description' => 'Ghi state, history append-only và refund intent trong cùng transaction.'],
+        ],
+        'implementation_label' => 'Triển khai / Laravel + MySQL', 'implementation_title' => 'Giữ capacity và history nhất quán', 'implementation_description' => 'Action sở hữu transaction và lock; FormRequest validate hình dạng; controller map domain rejection thành phản hồi đã dịch.', 'boundaries' => [
+            ['label' => 'Cutoff', 'value' => 'UTC; now < cutoff, ngoại trừ admin hủy có reason'],
+            ['label' => 'Concurrency', 'value' => 'Khóa course theo thứ tự cố định rồi khóa registration'],
+            ['label' => 'Refund', 'value' => 'Chỉ có refund intent toàn phần nội bộ; chưa có worker provider'],
+        ],
+        'examples_label' => 'Ví dụ code / bản đồ trách nhiệm', 'examples_title' => 'Giao thức rõ ràng để review', 'examples' => [
+            ['title' => 'Hủy', 'description' => 'Registration đã kết thúc không thể giải phóng capacity hai lần.', 'code' => "lockCourse();\nlockRegistration();\nassertConfirmed();\ncheckCutoffOrAdminReason();\nwriteCancelledAndHistory();\nwriteUniqueRefundIntent();"],
+            ['title' => 'Đổi lịch', 'description' => 'Chấp nhận course đích trước khi chuyển registration hiện tại.', 'code' => "lockCourses(sort([sourceId, targetId]));\nlockRegistration();\nassertCutoffAndCapacity();\nmoveAndWriteHistory();"],
+        ],
+        'tradeoff_label' => 'Đánh đổi', 'tradeoff_title' => 'Bảo đảm và chi phí', 'tradeoffs' => [
+            ['class' => 'lab-tradeoff-card--safe', 'title' => 'Bảo vệ', 'description' => 'State hiện tại, history và refund intent commit cùng nhau; hủy lặp bị từ chối.'],
+            ['class' => 'lab-tradeoff-card--cost', 'title' => 'Chi phí', 'description' => 'Lock tuần tự hóa ghi trên cùng course và có thể tăng chờ khi gần đầy.'],
+            ['class' => 'lab-tradeoff-card--limit', 'title' => 'Giới hạn', 'description' => 'Provider settlement và bằng chứng concurrency MySQL nằm ngoài phạm vi này.'],
+        ],
+        'threat_label' => 'Phân tích lỗi / tấn công', 'threat_title' => 'Coi form cũ và identifier bị sửa là không đáng tin', 'threats' => ['Replay hủy sau khi state đã đổi', 'Gửi registration id của attendee khác', 'Chuyển vào course đầy hoặc đã đóng', 'Admin override không có reason', 'Gọi provider trước khi database commit'],
+        'review_label' => 'Danh sách kiểm tra', 'review_title' => 'Trước khi gọi logic hủy đáng tin', 'review' => ['Cutoff và override rõ ràng', 'Action kiểm tra ownership', 'Lock dùng thứ tự ổn định', 'State và history commit cùng nhau', 'Refund intent unique và có mức trần', 'Provider retry cần worker idempotent'],
+    ],
 ];

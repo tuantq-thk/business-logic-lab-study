@@ -1,0 +1,52 @@
+<?php
+
+return [
+    'page' => [
+        'title' => 'BL-07 Cancellation and rescheduling',
+        'description' => 'Learn how cancellation cutoff, seat capacity, history and refund intent fit into one business transaction.',
+        'back' => 'Back to dashboard',
+        'eyebrow' => 'Cancellation policy',
+        'level' => 'Intermediate',
+        'heading' => 'Cancel or reschedule without losing the business record',
+    ],
+    'practice' => [
+        'divider' => 'Practice', 'label' => 'Try the rules', 'title' => 'Change a course registration',
+        'description' => 'Actions use current database state. Times are UTC in this demo. Admin can cancel another attendee registration; after cutoff, an auditable reason is required.',
+        'registrations' => 'Course registrations', 'empty' => 'No course registrations were found.',
+        'for_attendee' => 'Attendee: :name',
+        'starts' => 'Starts :date UTC', 'paid' => 'Paid :currency :amount', 'action' => 'Action',
+        'cancel' => 'Cancel registration', 'reschedule' => 'Reschedule', 'target' => 'Target course',
+        'choose_target' => 'Choose a course', 'reason' => 'Reason (optional for attendee)',
+        'reason_hint' => 'An admin must provide a reason to cancel another attendee registration at or after cutoff.',
+        'submit' => 'Apply action', 'history' => 'View decision history', 'history_cancelled' => 'Cancelled',
+        'history_rescheduled' => 'Rescheduled', 'refund' => 'Refund intent: :status · :currency :amount',
+        'courses' => 'Open courses', 'no_courses' => 'There are no future open courses.',
+        'course_meta' => 'Starts :starts UTC · cutoff :cutoff UTC · :confirmed/:capacity seats used',
+        'override_note' => 'Attendees may cancel or reschedule before cutoff. At or after cutoff, an admin can cancel another attendee registration only with a reason.',
+        'status_confirmed' => 'Confirmed', 'status_cancelled' => 'Cancelled', 'no_target' => 'No new course',
+    ],
+    'enums' => ['refund_status' => ['pending' => 'Pending', 'completed' => 'Completed', 'failed' => 'Failed']],
+    'validation' => [
+        'action' => 'Choose cancel or reschedule.',
+        'registration' => 'Select a valid registration.',
+        'target_required' => 'Choose a target course to reschedule.',
+        'target_unavailable' => 'The selected target course is unavailable.',
+        'reason' => 'The reason must be text no longer than 500 characters.',
+    ],
+    'flash' => [
+        'cancel_success' => 'Registration cancelled. A refund intent was recorded when an amount had been paid.',
+        'reschedule_success' => 'Registration moved to the selected course.',
+    ],
+    'errors' => [
+        'not_confirmed' => 'This registration is no longer active.',
+        'forbidden' => 'You cannot change this registration.',
+        'override_reason_required' => 'An admin cancellation after the cutoff requires a reason.',
+        'cutoff_passed' => 'The cancellation or rescheduling cutoff has passed.',
+        'same_course' => 'Choose a different course.',
+        'target_unavailable' => 'The selected course is not eligible for rescheduling.',
+        'target_full' => 'The selected course has no seats available.',
+        'already_registered' => 'This attendee already has a registration for the selected course.',
+        'price_mismatch' => 'Rescheduling across different prices or currencies is outside this policy.',
+        'stale_registration' => 'This registration changed in another request. Reload and try again.',
+    ],
+];

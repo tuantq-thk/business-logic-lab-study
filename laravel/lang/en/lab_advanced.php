@@ -16,6 +16,7 @@ return [
         'business-calendar-slots' => ['Timezone database update workflow and historical rule versioning are not implemented.', 'Generated availability is not a booking guarantee without a write-time re-check.'],
         'booking-overlap' => ['Distributed locking across multiple database writers is not proven by this local lab.', 'Payment, notification and cancellation side effects need an outbox or after-commit protocol.'],
         'contextual-validation' => ['Rate limiting, bot defense and invite-secret rotation are not implemented.', 'Capacity race behavior needs a production-engine integration test.'],
+        'cancellation-rescheduling' => ['Refund provider settlement, queue retry and reconciliation are not implemented.', 'SQLite and MySQL concurrency behavior has not been verified for this lab.'],
     ],
     'evidence_status' => ['verified' => 'Verified', 'conceptual' => 'Conceptual', 'not_covered' => 'Not covered'],
     'shared' => [
@@ -117,5 +118,44 @@ return [
         'pitfall_label' => 'Pitfalls / anti-patterns', 'pitfall_title' => 'Context bugs often look like friendly UX', 'pitfalls' => [['title' => 'Only disabling the button', 'description' => 'A client control is not an authorization or capacity boundary.'], ['title' => 'Generic error for every case', 'description' => 'Users cannot correct input when domain conditions are hidden.'], ['title' => 'Trusting rendered event data', 'description' => 'The event may close or fill after the page was loaded.']],
         'maturity_label' => 'Maturity levels', 'maturity_title' => 'Improve from valid input to trustworthy registration', 'maturity' => [['level' => 'Level 1 / Correctness', 'title' => 'Contextual rule', 'description' => 'Window, ticket, code, capacity and duplicate checks are server-side.'], ['level' => 'Level 2 / Production', 'title' => 'Safe UX', 'description' => 'Errors scroll to the right section and telemetry distinguishes user correction from conflict.'], ['level' => 'Level 3 / Advanced', 'title' => 'Abuse resistance', 'description' => 'Rate limits, secret rotation, bot controls and load tests protect the registration boundary.']],
         'observability_label' => 'Observability / vận hành', 'observability_title' => 'Observe outcomes without leaking invite secrets', 'observability_description' => 'Logs should answer why a registration failed while keeping codes, tokens and personal data out of routine telemetry.', 'observability' => [['title' => 'Structured log', 'description' => 'event_id, ticket_type, outcome and validation reason; never raw invite_code.'], ['title' => 'Metrics', 'description' => 'registration_success, window_closed, duplicate, invalid_code and capacity_conflict.'], ['title' => 'Runbook', 'description' => 'Verify event window, capacity count and uniqueness before replaying a failed request.']],
+    ],
+    'cancellation-rescheduling' => [
+        'data_label' => 'Data model / database contract', 'data_title' => 'Registration state is the capacity source of truth', 'data_description' => 'Confirmed rows count against capacity. History is append-only. One refund intent is allowed per cancelled registration.',
+        'data_rows' => [
+            ['element' => 'cancellation_course_registrations', 'contract' => 'Unique course + attendee; confirmed or cancelled; paid amount stored in integer minor units.', 'reason' => 'Prevents duplicate active enrollment and bounds any refund.'],
+            ['element' => 'cancellation_registration_histories', 'contract' => 'Append-only action with actor, reason, source/target course and policy version.', 'reason' => 'Explains every state change without overwriting prior decisions.'],
+            ['element' => 'cancellation_refund_intents', 'contract' => 'Unique registration and idempotency key; pending full amount only.', 'reason' => 'Makes local compensation intent atomic and non-duplicated.'],
+        ],
+        'decision_label' => 'Decision table', 'decision_title' => 'Map policy facts to mutation outcomes', 'decision_description' => 'The action uses UTC time and locked database state, not the browser display.',
+        'decision_rows' => [
+            ['when' => 'Owner; now < cutoff; confirmed', 'result' => 'Cancel or reschedule', 'evidence' => 'State and history commit atomically; cancel creates refund intent.'],
+            ['when' => 'At/after cutoff; admin cancels another attendee registration with reason', 'result' => 'Cancel with override', 'evidence' => 'Reason and actor are retained in history.'],
+            ['when' => 'At/after cutoff without override, stale state, wrong owner or full target', 'result' => 'Reject without mutation', 'evidence' => 'No history, seat release or refund intent is written.'],
+        ],
+        'test_label' => 'Test matrix / evidence', 'test_title' => 'Evidence status', 'test_description' => 'Implementation is present, but no automated suite or MySQL concurrency harness has been run for this lab yet.',
+        'test_principles' => ['Test before/at/after cutoff with a fixed clock.', 'Test duplicate cancel and source/target capacity.', 'Use two independent MySQL connections before claiming race safety.'],
+        'test_rows' => [
+            ['scenario' => 'Cutoff, ownership, duplicate and capacity decisions', 'level' => 'Feature', 'status' => 'not_covered', 'assertion' => 'Expected HTTP response and no unintended state/history/refund mutation.'],
+            ['scenario' => 'MySQL concurrent cancel/reschedule', 'level' => 'Integration', 'status' => 'not_covered', 'assertion' => 'One valid mutation wins and counts remain within capacity.'],
+            ['scenario' => 'Refund provider retry', 'level' => 'Async', 'status' => 'not_covered', 'assertion' => 'Provider adapter is outside current implementation.'],
+        ],
+        'performance_label' => 'Performance / scalability', 'performance_title' => 'Contention follows course rows', 'performance_description' => 'The course row is a simple serialization point for capacity changes. Transactions are short and contain no network calls; lock waits still need measurement on MySQL.',
+        'performance_points' => ['Measure transaction duration and lock wait.', 'Inspect the course/status index with EXPLAIN.', 'Use stable lock order when source and target differ.', 'Paginate history if course volume grows.'],
+        'pitfall_label' => 'Pitfalls / anti-patterns', 'pitfall_title' => 'Shortcuts that break compensation', 'pitfalls' => [
+            ['title' => 'Release before target check', 'description' => 'Rescheduling must not leave the attendee without either course when the destination is full.'],
+            ['title' => 'Provider call in transaction', 'description' => 'A successful remote refund cannot be rolled back when local commit fails.'],
+            ['title' => 'Mutable audit record', 'description' => 'Overwriting history removes evidence needed to explain the policy decision.'],
+        ],
+        'maturity_label' => 'Maturity levels', 'maturity_title' => 'Separate local correctness from operational proof', 'maturity' => [
+            ['level' => 'Level 1 / Correctness', 'title' => 'Explicit policy', 'description' => 'Cutoff, actor, state and atomic history are defined.'],
+            ['level' => 'Level 2 / Operations', 'title' => 'Refund worker', 'description' => 'Add after-commit queueing, provider idempotency and reconciliation.'],
+            ['level' => 'Level 3 / Evidence', 'title' => 'Concurrency proof', 'description' => 'Run MySQL two-connection races and monitor lock/conflict metrics.'],
+        ],
+        'observability_label' => 'Observability / operations', 'observability_title' => 'Make every outcome traceable', 'observability_description' => 'Record identifiers and outcome codes; never log payment secrets or unbounded user input.',
+        'observability' => [
+            ['title' => 'Structured logs', 'description' => 'Registration, source/target course, actor, action and outcome code.'],
+            ['title' => 'Metrics', 'description' => 'Cancellation success, cutoff rejection, capacity conflict and transaction duration.'],
+            ['title' => 'Runbook', 'description' => 'Compare registration, history and refund intent before replaying any external refund.'],
+        ],
     ],
 ];

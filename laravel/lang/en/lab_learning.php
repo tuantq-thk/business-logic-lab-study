@@ -70,4 +70,42 @@ return [
         'threat_label' => 'Threat / failure analysis', 'threat_title' => 'Attack timezone and boundary assumptions', 'threats' => ['Interpret a room date in application timezone', 'Accept a slot that crosses closing time', 'Ignore a closed override', 'Generate nonexistent or duplicated DST local times', 'Use stale availability as a booking guarantee'],
         'review_label' => 'Review checklist', 'review_title' => 'Before calling slot generation reliable', 'review' => ['Room timezone is authoritative', 'Override precedence is explicit', 'Slots are fully contained', 'UTC conversion is deterministic', 'DST and boundary tests exist', 'Booking re-checks availability at write time'],
     ],
+    'cancellation-rescheduling' => [
+        'path_title' => 'Suggested reading path', 'path_description' => 'Follow one registration through policy, transaction and compensation.',
+        'objectives_title' => 'Learning objectives', 'objectives' => [
+            ['label' => '01 / cutoff', 'title' => 'Define the policy boundary', 'description' => 'Explain the exclusive cutoff and its admin override.'],
+            ['label' => '02 / capacity', 'title' => 'Protect the seat count', 'description' => 'Use locked, current registration state for cancel and reschedule.'],
+            ['label' => '03 / evidence', 'title' => 'Preserve decisions', 'description' => 'Keep actor, reason, old/new course and policy version in history.'],
+        ],
+        'theory_label' => 'Theory / mental model', 'theory_title' => 'Cancellation is a state change with compensation intent', 'theory_description' => 'Confirmed registrations consume seats. Cancellation releases one seat once; rescheduling moves the same registration only after the destination is accepted. Refund intent is local and atomic.',
+        'concepts' => [
+            ['title' => 'Cutoff is an instant', 'description' => 'The rule accepts now < cutoff. At and after cutoff, an admin may cancel another attendee registration with a reason.'],
+            ['title' => 'Capacity is derived', 'description' => 'Confirmed rows consume seats; cancelled rows do not. Displayed counts are advisory until the course is locked.'],
+            ['title' => 'Compensation is separate', 'description' => 'A refund intent commits with cancellation. Provider settlement is not part of the database transaction or this implementation.'],
+        ],
+        'invariant_label' => 'Invariant / decision rule', 'invariant_title' => 'One cancellation releases one seat and creates at most one refund intent', 'invariant_code' => "status = confirmed\nAND (now < cutoff OR (admin_override AND reason_present))\nAND history_commits_with_state\nAND refund_amount <= amount_paid\nAND one_refund_per_registration", 'invariant_description' => 'Course locks serialize capacity changes. Registration locks serialize cancel/reschedule. Unique constraints are the duplicate backstop.',
+        'flow_label' => 'Code flow / request lifecycle', 'flow_title' => 'Re-check mutable facts inside the write boundary', 'flow' => [
+            ['title' => 'Validate shape', 'description' => 'Allowlisted action, registration id, required reschedule target and bounded reason.'],
+            ['title' => 'Authorize scope', 'description' => 'The attendee owns cancel/reschedule; an admin may cancel another attendee registration.'],
+            ['title' => 'Lock current data', 'description' => 'Lock course rows in ascending id order, then lock and re-check registration.'],
+            ['title' => 'Apply policy', 'description' => 'Check cutoff, current state, target availability and capacity before mutation.'],
+            ['title' => 'Commit evidence', 'description' => 'Write state, append-only history and refund intent in one transaction.'],
+        ],
+        'implementation_label' => 'Implementation / Laravel + MySQL', 'implementation_title' => 'Keep capacity and history consistent', 'implementation_description' => 'The action owns transaction and locks; FormRequest validates shape; the controller maps domain rejections to localized feedback.', 'boundaries' => [
+            ['label' => 'Cutoff', 'value' => 'UTC; now < cutoff, except reasoned admin cancellation'],
+            ['label' => 'Concurrency', 'value' => 'Sorted course locks then registration lock'],
+            ['label' => 'Refund', 'value' => 'Local full-refund intent only; no provider worker'],
+        ],
+        'examples_label' => 'Code example / responsibility map', 'examples_title' => 'Make the protocol easy to review', 'examples' => [
+            ['title' => 'Cancel', 'description' => 'A terminal registration cannot release capacity twice.', 'code' => "lockCourse();\nlockRegistration();\nassertConfirmed();\ncheckCutoffOrAdminReason();\nwriteCancelledAndHistory();\nwriteUniqueRefundIntent();"],
+            ['title' => 'Reschedule', 'description' => 'Accept the destination before moving the existing registration.', 'code' => "lockCourses(sort([sourceId, targetId]));\nlockRegistration();\nassertCutoffAndCapacity();\nmoveAndWriteHistory();"],
+        ],
+        'tradeoff_label' => 'Trade-offs', 'tradeoff_title' => 'Guarantees and costs', 'tradeoffs' => [
+            ['class' => 'lab-tradeoff-card--safe', 'title' => 'Protects', 'description' => 'Current state, history and refund intent commit together; duplicate cancellation is rejected.'],
+            ['class' => 'lab-tradeoff-card--cost', 'title' => 'Costs', 'description' => 'Locks serialize writes for the same course and can add wait near capacity.'],
+            ['class' => 'lab-tradeoff-card--limit', 'title' => 'Limits', 'description' => 'Provider settlement and MySQL concurrency evidence remain outside this slice.'],
+        ],
+        'threat_label' => 'Threat / failure analysis', 'threat_title' => 'Assume stale forms and tampered identifiers', 'threats' => ['Replay cancellation after a state change', 'Submit another attendee registration id', 'Move into a full or closed course', 'Use admin override without reason', 'Call a provider before database commit'],
+        'review_label' => 'Review checklist', 'review_title' => 'Before calling cancellation reliable', 'review' => ['Cutoff and override are explicit', 'Ownership is checked in the action', 'Locks use stable order', 'State and history commit together', 'Refund intent is unique and bounded', 'Provider retries need an idempotent worker'],
+    ],
 ];

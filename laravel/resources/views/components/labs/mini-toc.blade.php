@@ -3,6 +3,7 @@
 @php($legacy = [
     'booking-overlap' => ['tradeoffs' => 'booking-overlap-tradeoffs', 'maturity' => 'booking-overlap-maturity'],
     'contextual-validation' => ['tradeoffs' => 'contextual-validation-tradeoffs'],
+    'cancellation-rescheduling' => ['tradeoffs' => 'cancellation-rescheduling-tradeoffs'],
 ])
 @php($groups = [
     ['label' => __('lab_learning.navigation.context_label'), 'items' => [

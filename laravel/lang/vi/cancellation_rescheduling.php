@@ -1,0 +1,52 @@
+<?php
+
+return [
+    'page' => [
+        'title' => 'BL-07 Hủy và đổi lịch',
+        'description' => 'Tìm hiểu cutoff hủy, capacity seat, history và refund intent trong một transaction nghiệp vụ.',
+        'back' => 'Về dashboard',
+        'eyebrow' => 'Chính sách hủy',
+        'level' => 'Trung cấp',
+        'heading' => 'Hủy hoặc đổi lịch mà vẫn giữ đúng dấu vết nghiệp vụ',
+    ],
+    'practice' => [
+        'divider' => 'Thực hành', 'label' => 'Thử các rule', 'title' => 'Thay đổi đăng ký khóa học',
+        'description' => 'Action dùng state mới nhất trong database. Thời gian demo là UTC. Admin có thể hủy đăng ký của attendee khác; tại hoặc sau cutoff phải có reason kiểm toán được.',
+        'registrations' => 'Đăng ký khóa học', 'empty' => 'Không tìm thấy đăng ký khóa học nào.',
+        'for_attendee' => 'Attendee: :name',
+        'starts' => 'Bắt đầu :date UTC', 'paid' => 'Đã thu :currency :amount', 'action' => 'Thao tác',
+        'cancel' => 'Hủy đăng ký', 'reschedule' => 'Đổi lịch', 'target' => 'Khóa học đích',
+        'choose_target' => 'Chọn khóa học', 'reason' => 'Lý do (attendee không bắt buộc)',
+        'reason_hint' => 'Admin phải ghi reason khi hủy đăng ký của attendee khác tại hoặc sau cutoff.',
+        'submit' => 'Thực hiện', 'history' => 'Xem lịch sử quyết định', 'history_cancelled' => 'Đã hủy',
+        'history_rescheduled' => 'Đã đổi lịch', 'refund' => 'Refund intent: :status · :currency :amount',
+        'courses' => 'Khóa học đang mở', 'no_courses' => 'Không có khóa học tương lai nào đang mở.',
+        'course_meta' => 'Bắt đầu :starts UTC · cutoff :cutoff UTC · đã dùng :confirmed/:capacity seat',
+        'override_note' => 'Attendee có thể hủy hoặc đổi lịch trước cutoff. Tại hoặc sau cutoff, admin chỉ được hủy đăng ký của attendee khác khi có reason.',
+        'status_confirmed' => 'Đã xác nhận', 'status_cancelled' => 'Đã hủy', 'no_target' => 'Không có khóa mới',
+    ],
+    'enums' => ['refund_status' => ['pending' => 'Đang chờ', 'completed' => 'Hoàn tất', 'failed' => 'Thất bại']],
+    'validation' => [
+        'action' => 'Chọn hủy hoặc đổi lịch.',
+        'registration' => 'Chọn một đăng ký hợp lệ.',
+        'target_required' => 'Chọn khóa học đích để đổi lịch.',
+        'target_unavailable' => 'Khóa học đích không khả dụng.',
+        'reason' => 'Reason phải là văn bản không quá 500 ký tự.',
+    ],
+    'flash' => [
+        'cancel_success' => 'Đã hủy đăng ký. Refund intent được ghi nếu đã thu tiền.',
+        'reschedule_success' => 'Đã chuyển đăng ký sang khóa học đã chọn.',
+    ],
+    'errors' => [
+        'not_confirmed' => 'Đăng ký này không còn hoạt động.',
+        'forbidden' => 'Bạn không thể thay đổi đăng ký này.',
+        'override_reason_required' => 'Admin phải ghi lý do khi hủy sau cutoff.',
+        'cutoff_passed' => 'Đã qua cutoff hủy hoặc đổi lịch.',
+        'same_course' => 'Hãy chọn một khóa học khác.',
+        'target_unavailable' => 'Khóa học đã chọn không đủ điều kiện để đổi lịch.',
+        'target_full' => 'Khóa học đã chọn không còn chỗ.',
+        'already_registered' => 'Attendee đã có đăng ký ở khóa học đã chọn.',
+        'price_mismatch' => 'Chưa hỗ trợ đổi giữa các khóa học khác giá hoặc currency.',
+        'stale_registration' => 'Đăng ký đã được thay đổi bởi request khác. Hãy tải lại rồi thử lại.',
+    ],
+];

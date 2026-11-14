@@ -16,6 +16,7 @@ return [
         'business-calendar-slots' => ['Workflow cập nhật timezone database và versioning historical rule chưa được triển khai.', 'Availability generate không phải booking guarantee nếu thiếu write-time re-check.'],
         'booking-overlap' => ['Distributed lock giữa nhiều database writer chưa được chứng minh trong lab local.', 'Payment, notification và cancellation side effect cần outbox hoặc after-commit protocol.'],
         'contextual-validation' => ['Rate limit, bot defense và invite-secret rotation chưa được triển khai.', 'Capacity race cần integration test trên production database engine.'],
+        'cancellation-rescheduling' => ['Chưa triển khai quyết toán refund qua provider, retry queue và reconciliation.', 'Chưa kiểm chứng concurrency trên SQLite hoặc MySQL cho lab này.'],
     ],
     'evidence_status' => ['verified' => 'Đã verify', 'conceptual' => 'Mô hình cần có', 'not_covered' => 'Chưa cover'],
     'shared' => ['element' => 'Thành phần', 'contract' => 'Contract', 'reason' => 'Ý nghĩa', 'verified_automated' => 'Đã verify bằng automated test', 'conceptual_requirement' => 'Yêu cầu ở mức kiến trúc', 'not_covered' => 'Chưa được cover', 'limitations_label' => 'Known limitations / giới hạn đã biết', 'limitations_title' => 'Lab này chưa chứng minh điều gì', 'limitations_description' => 'Hãy xem đây là boundary rõ ràng của ví dụ. Claim production cần thêm evidence, kiểm soát vận hành và quyết định domain phù hợp.', 'limitations' => ['Demo không thay thế load test trên traffic production.', 'External side effect cần after-commit hoặc outbox strategy.', 'Threshold và guarantee phải được xem lại khi data volume hoặc contention thay đổi.'], 'measure_before_optimize' => 'Đo trước khi tối ưu'],
@@ -75,5 +76,44 @@ return [
         'pitfall_label' => 'Pitfalls / anti-pattern', 'pitfall_title' => 'Context bug thường trông giống UX thân thiện', 'pitfalls' => [['title' => 'Chỉ disable button', 'description' => 'Client control không phải authorization hay capacity boundary.'], ['title' => 'Một lỗi chung cho mọi case', 'description' => 'User không biết sửa input khi domain condition bị che.'], ['title' => 'Tin event đã render', 'description' => 'Event có thể đóng hoặc hết chỗ sau khi page load.']],
         'maturity_label' => 'Maturity levels', 'maturity_title' => 'Từ input hợp lệ đến registration đáng tin', 'maturity' => [['level' => 'Level 1 / Correctness', 'title' => 'Contextual rule', 'description' => 'Window, ticket, code, capacity và duplicate đều check server-side.'], ['level' => 'Level 2 / Production', 'title' => 'UX an toàn', 'description' => 'Lỗi scroll đúng section và telemetry phân biệt correction với conflict.'], ['level' => 'Level 3 / Advanced', 'title' => 'Chống abuse', 'description' => 'Rate limit, secret rotation, bot control và load test bảo vệ boundary.']],
         'observability_label' => 'Observability / vận hành', 'observability_title' => 'Quan sát outcome mà không làm lộ invite secret', 'observability_description' => 'Log cần trả lời registration fail vì sao nhưng không đưa code, token hoặc personal data vào telemetry thường ngày.', 'observability' => [['title' => 'Structured log', 'description' => 'event_id, ticket_type, outcome và reason; không log raw invite_code.'], ['title' => 'Metrics', 'description' => 'registration_success, window_closed, duplicate, invalid_code và capacity_conflict.'], ['title' => 'Runbook', 'description' => 'Verify window, capacity count và uniqueness trước khi replay request.']],
+    ],
+    'cancellation-rescheduling' => [
+        'data_label' => 'Mô hình dữ liệu / database contract', 'data_title' => 'State registration là nguồn sự thật của capacity', 'data_description' => 'Row confirmed được tính vào capacity. History chỉ ghi nối tiếp. Mỗi registration đã hủy chỉ có một refund intent.',
+        'data_rows' => [
+            ['element' => 'cancellation_course_registrations', 'contract' => 'Unique course + attendee; trạng thái confirmed/cancelled; số tiền đã thu lưu bằng integer minor unit.', 'reason' => 'Ngăn đăng ký trùng và tạo giới hạn trên cho refund.'],
+            ['element' => 'cancellation_registration_histories', 'contract' => 'Action append-only gồm actor, reason, course nguồn/đích và policy version.', 'reason' => 'Giải thích từng thay đổi mà không ghi đè quyết định cũ.'],
+            ['element' => 'cancellation_refund_intents', 'contract' => 'Unique theo registration và idempotency key; chỉ ghi full amount ở trạng thái pending.', 'reason' => 'Làm ý định bù trừ nội bộ nguyên tử và không trùng.'],
+        ],
+        'decision_label' => 'Bảng quyết định', 'decision_title' => 'Ánh xạ facts policy sang kết quả mutation', 'decision_description' => 'Action dùng UTC và state đã khóa trong database, không dùng thời gian hiển thị trên browser.',
+        'decision_rows' => [
+            ['when' => 'Owner; now < cutoff; confirmed', 'result' => 'Hủy hoặc đổi lịch', 'evidence' => 'State/history commit nguyên tử; hủy tạo refund intent.'],
+            ['when' => 'Tại/sau cutoff; admin hủy registration attendee khác kèm reason', 'result' => 'Hủy với override', 'evidence' => 'Reason và actor được lưu trong history.'],
+            ['when' => 'Sau cutoff thiếu override, state cũ, sai owner hoặc course đích đầy', 'result' => 'Từ chối, không mutation', 'evidence' => 'Không ghi history, giải phóng seat hay tạo refund intent.'],
+        ],
+        'test_label' => 'Ma trận test / bằng chứng', 'test_title' => 'Trạng thái evidence', 'test_description' => 'Đã có implementation nhưng chưa chạy automated suite hay MySQL concurrency harness cho lab này.',
+        'test_principles' => ['Test cutoff trước/tại/sau bằng clock cố định.', 'Test hủy lặp và capacity nguồn/đích.', 'Dùng hai MySQL connection độc lập trước khi claim race safety.'],
+        'test_rows' => [
+            ['scenario' => 'Cutoff, ownership, hủy lặp và capacity', 'level' => 'Feature', 'status' => 'not_covered', 'assertion' => 'HTTP response đúng và không có state/history/refund ngoài ý muốn.'],
+            ['scenario' => 'MySQL cancel/reschedule đồng thời', 'level' => 'Integration', 'status' => 'not_covered', 'assertion' => 'Chỉ một mutation hợp lệ thắng và capacity không vượt giới hạn.'],
+            ['scenario' => 'Retry refund provider', 'level' => 'Async', 'status' => 'not_covered', 'assertion' => 'Adapter provider nằm ngoài implementation hiện tại.'],
+        ],
+        'performance_label' => 'Hiệu năng / khả năng mở rộng', 'performance_title' => 'Tranh chấp tập trung ở course row', 'performance_description' => 'Course row là điểm tuần tự hóa đơn giản cho capacity. Transaction ngắn và không gọi mạng; vẫn cần đo lock wait trên MySQL.',
+        'performance_points' => ['Đo transaction duration và lock wait.', 'Dùng EXPLAIN kiểm tra index course/status.', 'Khóa theo thứ tự ổn định khi có source/target.', 'Phân trang history khi dữ liệu tăng.'],
+        'pitfall_label' => 'Lỗi thường gặp / anti-pattern', 'pitfall_title' => 'Lối tắt làm hỏng bù trừ', 'pitfalls' => [
+            ['title' => 'Giải phóng trước khi kiểm tra đích', 'description' => 'Reschedule không được khiến attendee mất cả course cũ lẫn course mới khi đích đã đầy.'],
+            ['title' => 'Gọi provider trong transaction', 'description' => 'Refund từ xa đã thành công không thể rollback khi local commit thất bại.'],
+            ['title' => 'Sửa history cũ', 'description' => 'Ghi đè history làm mất bằng chứng giải thích policy.'],
+        ],
+        'maturity_label' => 'Mức trưởng thành', 'maturity_title' => 'Tách correctness nội bộ khỏi bằng chứng vận hành', 'maturity' => [
+            ['level' => 'Level 1 / Correctness', 'title' => 'Policy rõ', 'description' => 'Cutoff, actor, state và history nguyên tử được xác định.'],
+            ['level' => 'Level 2 / Operations', 'title' => 'Refund worker', 'description' => 'Thêm queue after-commit, provider idempotency và reconciliation.'],
+            ['level' => 'Level 3 / Evidence', 'title' => 'Chứng minh concurrency', 'description' => 'Chạy race hai connection MySQL và theo dõi lock/conflict metrics.'],
+        ],
+        'observability_label' => 'Quan sát / vận hành', 'observability_title' => 'Theo dấu mọi kết quả', 'observability_description' => 'Ghi identifier và outcome code; không log secret thanh toán hay input người dùng không giới hạn.',
+        'observability' => [
+            ['title' => 'Structured log', 'description' => 'Registration, course nguồn/đích, actor, action và outcome code.'],
+            ['title' => 'Metrics', 'description' => 'Hủy thành công, cutoff rejection, capacity conflict và transaction duration.'],
+            ['title' => 'Runbook', 'description' => 'Đối chiếu registration, history và refund intent trước khi chạy lại refund bên ngoài.'],
+        ],
     ],
 ];

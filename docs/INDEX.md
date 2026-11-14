@@ -10,7 +10,7 @@
 - [BL-02 — Giá, giảm giá và thứ tự áp dụng](labs/02-pricing-discounts.md) — `evidence-backed locally`; giỏ hàng sách.
 - [BL-03 — Tồn kho, giữ hàng và capacity](labs/03-inventory-capacity.md) — `implemented locally`; SQLite evidence pass, MySQL concurrency pending; kho cửa hàng.
 - [BL-04 — Lịch làm việc, ngày nghỉ và sinh slot](labs/04-business-calendar-slots.md) — `implemented locally`; SQLite + MySQL functional evidence, phòng họp.
-- [BL-05 — Overlap và đặt lịch chống trùng](labs/05-booking-overlap.md) — lịch phòng theo resource.
+- [BL-05 — Overlap và đặt lịch chống trùng](labs/05-booking-overlap.md) — `implemented locally`; SQLite + MySQL functional evidence, concurrency harness pending.
 - [BL-06 — Validation theo ngữ cảnh nghiệp vụ](labs/06-contextual-validation.md) — đăng ký hội thảo.
 - [BL-07 — Hủy, đổi lịch và chính sách hoàn tác](labs/07-cancellation-rescheduling.md) — đăng ký khóa học.
 - [BL-08 — Idempotency và retry an toàn](labs/08-idempotency.md) — tạo đơn qua API.
@@ -31,6 +31,7 @@
 
 - [Template phân tích chuyên sâu](TEMPLATE.md)
 - [UI Guide](UI_GUIDE.md)
+- [BL UI & Content Template Rule](BL_UI_TEMPLATE.md)
 - [Roadmap](PLAN.md)
 
 ## Cách đọc trạng thái
@@ -46,3 +47,4 @@
 - [BL-02 — Pricing and discounts implementation](technical/BL-02-implementation.md)
 - [BL-03 — Inventory and capacity implementation](technical/BL-03-implementation.md)
 - [BL-04 — Business calendar and slots implementation](technical/BL-04-implementation.md)
+- [BL-05 — Booking overlap implementation](technical/BL-05-implementation.md)

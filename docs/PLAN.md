@@ -131,7 +131,7 @@ Các câu hỏi không chặn việc dùng bộ tài liệu này; chúng cần �
 ## 9. Exit criteria của roadmap
 
 - Mỗi lab trong catalog có tài liệu theo template chung; catalog có thể mở rộng.
-- BL-00, BL-01 và BL-02 đã được triển khai end-to-end; BL-03 và BL-04 đã có implementation local với SQLite + MySQL functional evidence. Concurrency harness cho BL-03/booking overlap của BL-05 vẫn là giới hạn được ghi rõ.
+- BL-00, BL-01 và BL-02 đã được triển khai end-to-end; BL-03, BL-04 và BL-05 đã có implementation local với SQLite + MySQL functional evidence. Two-connection concurrency harness cho BL-03/BL-05 vẫn là giới hạn được ghi rõ.
 - Mỗi tài liệu ghi rõ trạng thái planning vs implemented vs verified.
 - Chỉ claim đã kiểm chứng khi có command, environment, result và limits.
 - Có thể thêm lab mới mà không đổi cấu trúc tất cả bài cũ.

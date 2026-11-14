@@ -2,7 +2,7 @@
 
 > **Domain minh họa:** Đặt phòng họp theo phòng vật lý  
 > **Nhóm:** booking / overlap  
-> **Trạng thái:** kế hoạch phân tích; chưa phải evidence triển khai  
+> **Trạng thái:** implemented locally; SQLite + MySQL functional evidence đã pass; two-connection concurrency harness pending
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
 ## 1. Tóm tắt và phạm vi
@@ -145,13 +145,15 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 | Concurrency | Hai connection/process nếu invariant có race | Harness, barriers, số lần lặp, outcome |
 | Async/external | Queue/provider failure/retry nếu áp dụng | Fake/real service, retry configuration, limits |
 
-- [ ] Overlap hoàn toàn, một phần, bao chứa, sát biên, khác resource.
-- [ ] Cancelled booking không block.
+- [x] Overlap hoàn toàn, một phần, bao chứa, sát biên, khác resource.
+- [x] Cancelled booking không block.
+- [x] Idempotency key cùng interval trả lại booking cũ; khác interval bị reject.
+- [x] Booking ngoài availability và local time/DST invalid có message rõ.
 - [ ] Concurrent integration test với MySQL và hai connections: chỉ một thành công.
-- [ ] Kiểm tra deadlock/retry policy và idempotent retry.
-- [ ] UI hiển thị available rồi request sau bị conflict vẫn xử lý đúng.
+- [x] Transaction dùng row lock room và Laravel deadlock retry policy.
+- [x] UI hiển thị available và xử lý conflict ở write path.
 
-Đây là **kế hoạch test**, không phải khẳng định tests đã chạy. Khi triển khai cần ghi kết quả, runtime/DB cụ thể và giới hạn. Unit test không chứng minh locking, collation, transaction isolation hay queue driver behavior.
+Evidence hiện tại: 89 tests, 435 assertions passed trên SQLite và MySQL 9.5.0 (`laravel_test`); migration, FK, unique key, CHECK constraint, route, policy, overlap boundary, idempotency, privacy scope và cancel flow đã chạy. Chưa claim two-connection race outcome hoặc deadlock harness thực tế.
 
 ## 13. Failure modes, edge cases và mở rộng
 
@@ -183,3 +185,21 @@ Mỗi extension phải thêm rule và acceptance test riêng; không thêm field
 7. Tạo UI/API demo, docs chạy/reset và ghi evidence.
 
 **DoD:** không đánh dấu complete khi thiếu rule, test evidence, trade-off hoặc giới hạn quan trọng.
+
+## 16. Implementation map
+
+- `app/Features/BookingOverlap/ValueObjects/BookingInterval.php`: validate local interval và normalize UTC.
+- `app/Features/BookingOverlap/Actions/CreateRoomBooking.php`: lock room, kiểm tra active overlap, idempotency và insert trong transaction.
+- `app/Features/BookingOverlap/Actions/CancelRoomBooking.php`: authorize và cancel idempotently trong transaction.
+- `app/Features/BookingOverlap/Models/RoomBooking.php`: booking persistence, status/datetime casts và relations.
+- `database/migrations/2026_11_14_110000..110001`: booking table, indexes, FK và MySQL CHECK constraints.
+- `resources/views/labs/booking-overlap/index.blade.php`: book available slot và cancel booking demo.
+- UI BL-05 dùng learning-first template: objectives → theory → invariant → code flow → implementation/trade-offs → practice → evidence; có thể tái sử dụng cho các BL tiếp theo.
+- `tests/Feature/BookingOverlap/BookingOverlapTest.php`: boundary, conflict, cancellation, idempotency và route coverage.
+
+## 17. Verification limits
+
+- `composer test`: 89 tests, 435 assertions trên SQLite in-memory.
+- `composer test:mysql`: 89 tests, 435 assertions trên MySQL 9.5.0 với database `laravel_test`.
+- Room-row lock protocol đã triển khai theo cùng thứ tự cho mọi create request; chưa có process barrier để chứng minh race outcome.
+- BL-05 không tuyên bố overlap concurrency production-ready cho tới khi two-connection MySQL harness được chạy.

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Features\BookingOverlap\Models\RoomBooking;
+use App\Features\BookingOverlap\Policies\RoomBookingPolicy;
 use App\Features\InventoryCapacity\Models\InventoryItem;
 use App\Features\InventoryCapacity\Models\InventoryReservation;
 use App\Features\InventoryCapacity\Policies\InventoryItemPolicy;
@@ -50,7 +52,10 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)
                 ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
         });
+
+        RateLimiter::for('cancellation-rescheduling-mutations', function (Request $request): Limit {
+            return Limit::perMinute(20)
+                ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
     }
 }
-use App\Features\BookingOverlap\Models\RoomBooking;
-use App\Features\BookingOverlap\Policies\RoomBookingPolicy;

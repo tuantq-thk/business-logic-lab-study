@@ -2,6 +2,7 @@
 
 use App\Features\BookingOverlap\Http\Controllers\BookingOverlapController;
 use App\Features\BusinessCalendarSlots\Http\Controllers\BusinessCalendarSlotsController;
+use App\Features\CancellationRescheduling\Http\Controllers\CancellationReschedulingController;
 use App\Features\ContextualValidation\Http\Controllers\ContextualValidationController;
 use App\Features\InventoryCapacity\Http\Controllers\InventoryCapacityController;
 use App\Features\PricingDiscounts\Http\Controllers\Admin\PricingPromotionController;
@@ -85,6 +86,14 @@ Route::post('/labs/contextual-validation/registrations', [ContextualValidationCo
     ->middleware(['auth', 'lab.available', 'throttle:contextual-validation-mutations'])
     ->defaults('labKey', 'contextual-validation')
     ->name('labs.contextual-validation.store');
+Route::get('/labs/cancellation-rescheduling', [CancellationReschedulingController::class, 'index'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'cancellation-rescheduling')
+    ->name('labs.cancellation-rescheduling.index');
+Route::post('/labs/cancellation-rescheduling/mutations', [CancellationReschedulingController::class, 'mutate'])
+    ->middleware(['auth', 'lab.available', 'throttle:cancellation-rescheduling-mutations'])
+    ->defaults('labKey', 'cancellation-rescheduling')
+    ->name('labs.cancellation-rescheduling.mutate');
 Route::patch('/labs/state-transition/tickets/{ticket}/transition', [StateTransitionController::class, 'changeStatus'])
     ->middleware(['auth', 'lab.available'])
     ->defaults('labKey', 'state-transition')

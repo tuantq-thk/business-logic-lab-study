@@ -71,5 +71,16 @@ return [
             'toggleable' => true,
             'route_names' => ['labs.contextual-validation.index'],
         ],
+        'cancellation-rescheduling' => [
+            'key' => 'cancellation-rescheduling',
+            'label_key' => 'labs.cancellation_rescheduling.label',
+            'description_key' => 'labs.cancellation_rescheduling.description',
+            'group_key' => 'labs.cancellation_rescheduling.group',
+            'question_key' => 'labs.cancellation_rescheduling.question',
+            'implemented' => true,
+            'default_enabled' => true,
+            'toggleable' => true,
+            'route_names' => ['labs.cancellation-rescheduling.index'],
+        ],
     ],
 ];

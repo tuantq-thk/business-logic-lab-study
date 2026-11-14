@@ -49,5 +49,16 @@ return [
             'toggleable' => true,
             'route_names' => ['labs.business-calendar-slots.index'],
         ],
+        'booking-overlap' => [
+            'key' => 'booking-overlap',
+            'label_key' => 'labs.booking_overlap.label',
+            'description_key' => 'labs.booking_overlap.description',
+            'group_key' => 'labs.booking_overlap.group',
+            'question_key' => 'labs.booking_overlap.question',
+            'implemented' => true,
+            'default_enabled' => true,
+            'toggleable' => true,
+            'route_names' => ['labs.booking-overlap.index'],
+        ],
     ],
 ];

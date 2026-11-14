@@ -34,10 +34,18 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
         Gate::policy(InventoryItem::class, InventoryItemPolicy::class);
         Gate::policy(InventoryReservation::class, InventoryReservationPolicy::class);
+        Gate::policy(RoomBooking::class, RoomBookingPolicy::class);
 
         RateLimiter::for('inventory-mutations', function (Request $request): Limit {
             return Limit::perMinute(30)
                 ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
         });
+
+        RateLimiter::for('booking-mutations', function (Request $request): Limit {
+            return Limit::perMinute(30)
+                ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
     }
 }
+use App\Features\BookingOverlap\Models\RoomBooking;
+use App\Features\BookingOverlap\Policies\RoomBookingPolicy;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Features\BookingOverlap\Http\Controllers\BookingOverlapController;
 use App\Features\BusinessCalendarSlots\Http\Controllers\BusinessCalendarSlotsController;
 use App\Features\InventoryCapacity\Http\Controllers\InventoryCapacityController;
 use App\Features\PricingDiscounts\Http\Controllers\Admin\PricingPromotionController;
@@ -62,6 +63,19 @@ Route::get('/labs/business-calendar-slots', [BusinessCalendarSlotsController::cl
     ->middleware(['auth', 'lab.available'])
     ->defaults('labKey', 'business-calendar-slots')
     ->name('labs.business-calendar-slots.index');
+Route::get('/labs/booking-overlap', [BookingOverlapController::class, 'index'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'booking-overlap')
+    ->name('labs.booking-overlap.index');
+Route::post('/labs/booking-overlap/bookings', [BookingOverlapController::class, 'store'])
+    ->middleware(['auth', 'lab.available', 'throttle:booking-mutations'])
+    ->defaults('labKey', 'booking-overlap')
+    ->name('labs.booking-overlap.store');
+Route::delete('/labs/booking-overlap/bookings/{booking}', [BookingOverlapController::class, 'cancel'])
+    ->whereNumber('booking')
+    ->middleware(['auth', 'lab.available', 'throttle:booking-mutations'])
+    ->defaults('labKey', 'booking-overlap')
+    ->name('labs.booking-overlap.cancel');
 Route::patch('/labs/state-transition/tickets/{ticket}/transition', [StateTransitionController::class, 'changeStatus'])
     ->middleware(['auth', 'lab.available'])
     ->defaults('labKey', 'state-transition')

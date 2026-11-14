@@ -83,6 +83,22 @@ test('the inventory lab is exposed and reachable when enabled', function () {
         ->assertSee('Giữ đơn vị cuối mà không bán vượt tồn');
 });
 
+test('the business calendar lab is exposed and reachable when enabled', function () {
+    CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
+
+    $learner = User::factory()->create();
+
+    $this->actingAs($learner)
+        ->get('/home')
+        ->assertOk()
+        ->assertSee('business-calendar-slots');
+
+    $this->actingAs($learner)
+        ->get(route('labs.business-calendar-slots.index'))
+        ->assertOk()
+        ->assertSee(__('business_calendar_slots.page.heading'));
+});
+
 test('catalog metadata follows the active application locale', function () {
     CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
     $learner = User::factory()->create();

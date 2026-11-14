@@ -111,7 +111,7 @@ test('the admin catalog seeder is idempotent and leaves the catalog disabled by 
     $this->seed(AdminCatalogSeeder::class);
 
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->count())->toBe(1);
-    expect(CatalogSetting::query()->whereIn('key', ['state-transition', 'pricing-discounts', 'inventory-capacity'])->count())->toBe(3);
+    expect(CatalogSetting::query()->whereIn('key', ['state-transition', 'pricing-discounts', 'inventory-capacity', 'business-calendar-slots'])->count())->toBe(4);
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->isEnabled())->toBeFalse();
     expect(CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->first()->label_key)
         ->toBe('catalog.global.label');

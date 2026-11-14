@@ -38,5 +38,16 @@ return [
             'toggleable' => true,
             'route_names' => ['labs.inventory-capacity.index'],
         ],
+        'business-calendar-slots' => [
+            'key' => 'business-calendar-slots',
+            'label_key' => 'labs.business_calendar_slots.label',
+            'description_key' => 'labs.business_calendar_slots.description',
+            'group_key' => 'labs.business_calendar_slots.group',
+            'question_key' => 'labs.business_calendar_slots.question',
+            'implemented' => true,
+            'default_enabled' => true,
+            'toggleable' => true,
+            'route_names' => ['labs.business-calendar-slots.index'],
+        ],
     ],
 ];

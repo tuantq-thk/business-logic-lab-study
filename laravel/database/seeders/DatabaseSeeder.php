@@ -26,5 +26,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StateTransitionSeeder::class);
         $this->call(PricingDiscountsSeeder::class);
         $this->call(InventoryCapacitySeeder::class);
+        $this->call(BusinessCalendarSlotsSeeder::class);
     }
 }

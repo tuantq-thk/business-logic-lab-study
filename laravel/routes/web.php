@@ -1,5 +1,6 @@
 <?php
 
+use App\Features\BusinessCalendarSlots\Http\Controllers\BusinessCalendarSlotsController;
 use App\Features\InventoryCapacity\Http\Controllers\InventoryCapacityController;
 use App\Features\PricingDiscounts\Http\Controllers\Admin\PricingPromotionController;
 use App\Features\PricingDiscounts\Http\Controllers\PricingDiscountsController;
@@ -57,6 +58,10 @@ Route::post('/labs/inventory-capacity/reservations/{reservation}/release', [Inve
     ->middleware(['auth', 'lab.available', 'throttle:inventory-mutations'])
     ->defaults('labKey', 'inventory-capacity')
     ->name('labs.inventory-capacity.release');
+Route::get('/labs/business-calendar-slots', [BusinessCalendarSlotsController::class, 'index'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'business-calendar-slots')
+    ->name('labs.business-calendar-slots.index');
 Route::patch('/labs/state-transition/tickets/{ticket}/transition', [StateTransitionController::class, 'changeStatus'])
     ->middleware(['auth', 'lab.available'])
     ->defaults('labKey', 'state-transition')

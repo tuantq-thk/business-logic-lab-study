@@ -37,6 +37,27 @@ document.querySelectorAll('[data-inventory-form]').forEach((form) => {
         submit.textContent = submit.dataset.loadingLabel;
         submit.setAttribute('aria-busy', 'true');
         form.setAttribute('aria-busy', 'true');
+        const status = form.querySelector('[data-calendar-status]');
+
+        if (status) {
+            status.textContent = submit.dataset.loadingLabel;
+        }
+        submit.classList.add('cursor-wait', 'opacity-70');
+    });
+});
+
+document.querySelectorAll('[data-calendar-form]').forEach((form) => {
+    form.addEventListener('submit', () => {
+        const submit = form.querySelector('[data-calendar-submit]');
+
+        if (! submit) {
+            return;
+        }
+
+        submit.disabled = true;
+        submit.textContent = submit.dataset.loadingLabel;
+        submit.setAttribute('aria-busy', 'true');
+        form.setAttribute('aria-busy', 'true');
         submit.classList.add('cursor-wait', 'opacity-70');
     });
 });

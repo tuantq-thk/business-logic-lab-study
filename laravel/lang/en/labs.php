@@ -19,4 +19,10 @@ return [
         'group' => 'Pricing',
         'question' => 'How can a quote remain correct when several discount rules apply?',
     ],
+    'business_calendar_slots' => [
+        'label' => 'Business calendar & slots',
+        'description' => 'Turn weekly hours and date overrides into timezone-safe selectable slots.',
+        'group' => 'Calendar',
+        'question' => 'Which room slots are actually available on a local date?',
+    ],
 ];

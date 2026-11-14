@@ -13,7 +13,8 @@
 | BL-03 Inventory & capacity | implemented locally | SQLite + isolated MySQL functional tests; concurrency harness pending |
 | BL-04 Business calendar & slots | implemented locally | SQLite + isolated MySQL functional tests; booking overlap thuộc BL-05 |
 | BL-05 Booking overlap | implemented locally | SQLite + isolated MySQL functional tests; concurrency harness pending |
-| BL-06 trở đi | planned | Xem tài liệu lab tương ứng, chưa có source implementation |
+| BL-06 Contextual validation | implemented locally | SQLite functional evidence; MySQL/concurrency pending |
+| BL-07 trở đi | planned | Xem tài liệu lab tương ứng, chưa có source implementation |
 
 Chi tiết quyết định và giới hạn nằm ở [technical implementation records](../docs/INDEX.md#technical-implementation-records).
 

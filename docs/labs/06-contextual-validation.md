@@ -2,9 +2,11 @@
 
 > **Domain minh họa:** Đăng ký hội thảo  
 > **Nhóm:** contextual / validation  
-> **Trạng thái:** kế hoạch phân tích; chưa phải evidence triển khai  
+> **Trạng thái:** đã triển khai local; bằng chứng chức năng trên SQLite đã pass; bằng chứng MySQL/concurrency đang chờ
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
+
+**Triển khai hiện tại:** đăng ký workshop với FormRequest cho shape validation, `RegistrationPolicy` cho contextual eligibility, transaction lock trên event, unique event+attendee và server-side invite code verification.
 ## 1. Tóm tắt và phạm vi
 
 **Bài toán:** Làm sao tách input sai định dạng khỏi input không hợp lệ theo policy hiện hành?

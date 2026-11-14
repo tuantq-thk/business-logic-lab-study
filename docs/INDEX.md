@@ -11,7 +11,7 @@
 - [BL-03 — Tồn kho, giữ hàng và capacity](labs/03-inventory-capacity.md) — `implemented locally`; SQLite evidence pass, MySQL concurrency pending; kho cửa hàng.
 - [BL-04 — Lịch làm việc, ngày nghỉ và sinh slot](labs/04-business-calendar-slots.md) — `implemented locally`; SQLite + MySQL functional evidence, phòng họp.
 - [BL-05 — Overlap và đặt lịch chống trùng](labs/05-booking-overlap.md) — `implemented locally`; SQLite + MySQL functional evidence, concurrency harness pending.
-- [BL-06 — Validation theo ngữ cảnh nghiệp vụ](labs/06-contextual-validation.md) — đăng ký hội thảo.
+- [BL-06 — Validation theo ngữ cảnh nghiệp vụ](labs/06-contextual-validation.md) — `implemented locally`; SQLite functional evidence, MySQL/concurrency pending; đăng ký hội thảo.
 - [BL-07 — Hủy, đổi lịch và chính sách hoàn tác](labs/07-cancellation-rescheduling.md) — đăng ký khóa học.
 - [BL-08 — Idempotency và retry an toàn](labs/08-idempotency.md) — tạo đơn qua API.
 - [BL-09 — Phân quyền theo chủ sở hữu và phạm vi](labs/09-authorization-scope.md) — tài liệu tổ chức.
@@ -48,3 +48,4 @@
 - [BL-03 — Inventory and capacity implementation](technical/BL-03-implementation.md)
 - [BL-04 — Business calendar and slots implementation](technical/BL-04-implementation.md)
 - [BL-05 — Booking overlap implementation](technical/BL-05-implementation.md)
+- [BL-06 — Contextual validation implementation](technical/BL-06-implementation.md)

@@ -81,7 +81,8 @@ Mục lục và danh sách bài có thể mở rộng theo nhu cầu; README kh�
 | BL-03 Inventory & capacity | implemented locally | Functional SQLite tests; MySQL concurrency/EXPLAIN pending |
 | BL-04 Business calendar & slots | implemented locally | SQLite + MySQL functional tests; DST/booking concurrency còn giới hạn |
 | BL-05 Booking overlap | implemented locally | SQLite + MySQL functional tests; two-connection concurrency harness pending |
-| BL-06–BL-20 | planned | Chỉ có tài liệu phân tích |
+| BL-06 | implemented locally | Contextual validation; SQLite functional evidence, MySQL/concurrency pending |
+| BL-07–BL-20 | planned | Chỉ có tài liệu phân tích |
 
 “Evidence-backed” ở đây nghĩa là claim được kiểm tra trong runtime đã ghi, không có nghĩa production-ready. SQLite không thay thế evidence MySQL cho locking, isolation, index plan hoặc constraint semantics.
 

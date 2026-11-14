@@ -25,4 +25,10 @@ return [
         'group' => 'Lịch',
         'question' => 'Phòng còn slot nào trên một ngày địa phương cụ thể?',
     ],
+    'booking_overlap' => [
+        'label' => 'Đặt lịch không trùng',
+        'description' => 'Đặt phòng an toàn khi nhiều request cùng tranh một khoảng thời gian.',
+        'group' => 'Đặt lịch / concurrency',
+        'question' => 'Các request đồng thời có thể tạo booking bị trùng không?',
+    ],
 ];

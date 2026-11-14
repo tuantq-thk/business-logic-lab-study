@@ -25,4 +25,10 @@ return [
         'group' => 'Calendar',
         'question' => 'Which room slots are actually available on a local date?',
     ],
+    'booking_overlap' => [
+        'label' => 'Booking overlap',
+        'description' => 'Book a room safely when requests compete for the same interval.',
+        'group' => 'Booking / concurrency',
+        'question' => 'Can concurrent requests create overlapping bookings?',
+    ],
 ];

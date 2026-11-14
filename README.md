@@ -12,7 +12,7 @@ Mỗi lab là một lát cắt độc lập. Ví dụ có thể dùng support ti
 - Nhận biết race condition, retry, quyền truy cập và failure modes.
 - Bảo vệ quyết định bằng test/evidence thay vì chỉ trình bày thuật ngữ.
 
-> 📌 Repo hiện gồm cả tài liệu phân tích và một Laravel learning shell đang chạy. BL-00, BL-01 và BL-02 đã có implementation trong `laravel/`; trạng thái evidence và giới hạn của từng bài được ghi trong technical implementation record. Các BL còn lại vẫn là blueprint, không được hiểu là đã triển khai.
+> 📌 Repo hiện gồm tài liệu phân tích và một Laravel learning shell đang chạy. BL-00 đến BL-07 có source implementation; trạng thái evidence và giới hạn từng bài được ghi trong technical implementation record. BL-08 trở đi vẫn là blueprint.
 
 ## 🧭 Bắt đầu ở đây
 
@@ -82,7 +82,8 @@ Mục lục và danh sách bài có thể mở rộng theo nhu cầu; README kh�
 | BL-04 Business calendar & slots | implemented locally | SQLite + MySQL functional tests; DST/booking concurrency còn giới hạn |
 | BL-05 Booking overlap | implemented locally | SQLite + MySQL functional tests; two-connection concurrency harness pending |
 | BL-06 | implemented locally | Contextual validation; SQLite functional evidence, MySQL/concurrency pending |
-| BL-07–BL-20 | planned | Chỉ có tài liệu phân tích |
+| BL-07 | implemented locally; verification pending | Cancellation/reschedule flow, history và refund intent; chưa có test evidence |
+| BL-08–BL-20 | planned | Chỉ có tài liệu phân tích |
 
 “Evidence-backed” ở đây nghĩa là claim được kiểm tra trong runtime đã ghi, không có nghĩa production-ready. SQLite không thay thế evidence MySQL cho locking, isolation, index plan hoặc constraint semantics.
 

@@ -1,27 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ __('pricing_discounts.page.title') }}</title>
-        @fonts
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-[#f6f8fb] text-slate-950 antialiased">
-        <header class="border-b border-slate-200 bg-white/90">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-3 text-sm font-semibold"><span class="grid h-9 w-9 place-items-center rounded-lg bg-[#102a43] text-xs text-white">BL</span>{{ __('shell.brand') }}</a>
-                <form method="POST" action="{{ route('logout') }}">@csrf<button class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('shell.logout') }}</button></form>
-            </div>
-        </header>
-
-        <main class="mx-auto max-w-7xl px-4 py-7 sm:px-6">
+<x-labs.shell :title="__('pricing_discounts.page.title')" :description="__('pricing_discounts.page.description')">
+        <main id="main-content" class="mx-auto max-w-7xl px-4 py-7 sm:px-6">
             <a href="{{ route('dashboard') }}" class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('pricing_discounts.page.back') }}</a>
             <section class="mt-5 max-w-3xl">
                 <p class="font-mono text-xs uppercase tracking-[0.25em] text-cyan-700">{{ __('pricing_discounts.page.eyebrow') }}</p>
                 <h1 class="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{{ __('pricing_discounts.page.heading') }}</h1>
                 <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('pricing_discounts.page.description') }}</p>
             </section>
+
+            <x-labs.learning-overview lab="pricing-discounts" />
 
             <section class="mt-5 grid gap-3 lg:grid-cols-3" aria-label="{{ __('pricing_discounts.flow.aria_label') }}">
                 @foreach (['input', 'rules', 'quote'] as $step)
@@ -67,7 +53,7 @@
                 </section>
             @endcan
 
-            <section class="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+            <section id="pricing-discounts-practice" class="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                     <div class="flex items-end justify-between gap-4">
                         <div><p class="font-mono text-[10px] uppercase tracking-wider text-slate-400">{{ __('pricing_discounts.demo.eyebrow') }}</p><h2 class="mt-1 text-xl font-semibold">{{ __('pricing_discounts.demo.title') }}</h2></div>
@@ -156,5 +142,4 @@
                 </section>
             @endif
         </main>
-    </body>
-</html>
+</x-labs.shell>

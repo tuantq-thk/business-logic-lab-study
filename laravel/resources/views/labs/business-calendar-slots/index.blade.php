@@ -1,21 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ __('business_calendar_slots.page.title') }}</title>
-        @fonts
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-[#f6f8fb] text-slate-950 antialiased">
-        <header class="border-b border-slate-200 bg-white/90">
-            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-3 text-sm font-semibold"><span class="grid h-9 w-9 place-items-center rounded-lg bg-[#102a43] text-xs text-white">BL</span>{{ __('shell.brand') }}</a>
-                <form method="POST" action="{{ route('logout') }}">@csrf<button class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('shell.logout') }}</button></form>
-            </div>
-        </header>
-
-        <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+<x-labs.shell :title="__('business_calendar_slots.page.title')" :description="__('business_calendar_slots.page.description')">
+        <main id="main-content" class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
             <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('business_calendar_slots.page.back') }}</a>
             <section class="mt-6 max-w-3xl">
                 <p class="font-mono text-xs uppercase tracking-[0.25em] text-cyan-700">{{ __('business_calendar_slots.page.eyebrow') }}</p>
@@ -23,12 +7,14 @@
                 <p class="mt-4 text-sm leading-6 text-slate-600">{{ __('business_calendar_slots.page.description') }}</p>
             </section>
 
+            <x-labs.learning-overview lab="business-calendar-slots" />
+
             @if ($errors->any())
                 <div role="alert" aria-live="assertive" class="mt-7 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"><p class="font-semibold">{{ __('business_calendar_slots.errors.form_heading') }}</p><ul class="mt-2 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
             @endif
             @if ($generationError)<div role="alert" class="mt-7 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ $generationError }}</div>@endif
 
-            <section class="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <section id="business-calendar-slots-practice" class="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                 <div class="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                     <div><h2 class="text-lg font-semibold">{{ __('business_calendar_slots.form.title') }}</h2><p class="mt-1 text-xs text-slate-500">{{ __('business_calendar_slots.form.description') }}</p></div>
                     @if ($room)<p class="text-xs text-slate-500">{{ __('business_calendar_slots.form.timezone') }}: <span class="font-mono text-slate-700">{{ $room->timezone }}</span></p>@endif
@@ -59,5 +45,4 @@
                 </section>
             </section>
         </main>
-    </body>
-</html>
+</x-labs.shell>

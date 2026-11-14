@@ -60,7 +60,7 @@ class ContextualValidationController extends Controller
 
         return to_route('labs.contextual-validation.index')
             ->with('status', __('contextual_validation.flash.registered'))
-            ->withFragment('practice');
+            ->withFragment('contextual-validation-practice');
     }
 
     private function registrationError(string $field, string $messageKey): RedirectResponse
@@ -68,6 +68,6 @@ class ContextualValidationController extends Controller
         return back()
             ->withErrors([$field => __($messageKey)])
             ->withInput()
-            ->withFragment('practice');
+            ->withFragment('contextual-validation-practice');
     }
 }

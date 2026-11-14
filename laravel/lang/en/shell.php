@@ -24,6 +24,8 @@ return [
         'title' => ':label · :brand',
         'logout' => 'Log out',
         'back' => '← Back to catalog',
+        'skip_to_content' => 'Skip to content',
+        'back_to_top' => 'Back to top',
         'question' => 'Central question',
         'description' => 'This lab is open in the catalog. Its scenario and evidence will be built next under the BL-01 contract.',
     ],

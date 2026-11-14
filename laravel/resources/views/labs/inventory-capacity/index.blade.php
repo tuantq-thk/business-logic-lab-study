@@ -1,27 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ __('inventory_capacity.page.title') }}</title>
-        @fonts
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-[#f6f8fb] text-slate-950 antialiased">
-        <header class="border-b border-slate-200 bg-white/90">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-3 text-sm font-semibold"><span class="grid h-9 w-9 place-items-center rounded-lg bg-[#102a43] text-xs text-white">BL</span>{{ __('shell.brand') }}</a>
-                <form method="POST" action="{{ route('logout') }}">@csrf<button class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('shell.logout') }}</button></form>
-            </div>
-        </header>
-
-        <main class="mx-auto max-w-7xl px-4 py-7 sm:px-6">
+<x-labs.shell :title="__('inventory_capacity.page.title')" :description="__('inventory_capacity.page.description')">
+        <main id="main-content" class="mx-auto max-w-7xl px-4 py-7 sm:px-6">
             <a href="{{ route('dashboard') }}" class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('inventory_capacity.page.back') }}</a>
             <section class="mt-5 max-w-3xl">
                 <p class="font-mono text-xs uppercase tracking-[0.25em] text-cyan-700">{{ __('inventory_capacity.page.eyebrow') }}</p>
                 <h1 class="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{{ __('inventory_capacity.page.heading') }}</h1>
                 <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('inventory_capacity.page.description') }}</p>
             </section>
+
+            <x-labs.learning-overview lab="inventory-capacity" />
 
             <section class="mt-5 grid gap-3 lg:grid-cols-3" aria-label="{{ __('inventory_capacity.page.title') }}">
                 @foreach (['request', 'lock', 'result'] as $step)
@@ -36,7 +22,7 @@
             @if (session('status'))<div role="status" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</div>@endif
             @if ($errors->any())<div role="alert" class="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"><ul class="list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 
-            <section class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <section id="inventory-capacity-practice" class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                 <div class="flex items-end justify-between gap-4"><div><p class="font-mono text-[10px] uppercase tracking-wider text-slate-400">{{ __('inventory_capacity.inventory.eyebrow') }}</p><h2 class="mt-1 text-xl font-semibold">{{ __('inventory_capacity.inventory.title') }}</h2></div><span class="text-xs text-slate-500">{{ $items->count() }} SKU</span></div>
                 @if ($items->isEmpty())
                     <p class="mt-5 rounded-lg border border-dashed border-slate-300 p-5 text-sm text-slate-500">{{ __('inventory_capacity.inventory.empty') }}</p>
@@ -68,5 +54,4 @@
                 @endif
             </section>
         </main>
-    </body>
-</html>
+</x-labs.shell>

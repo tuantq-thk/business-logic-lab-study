@@ -1,21 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ __('state_transition.page.title') }}</title>
-        @fonts
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-[#f6f8fb] text-slate-950 antialiased">
-        <header class="border-b border-slate-200 bg-white/90">
-            <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-3 text-sm font-semibold"><span class="grid h-9 w-9 place-items-center rounded-lg bg-[#102a43] text-xs text-white">BL</span>{{ __('welcome.brand') }}</a>
-                <form method="POST" action="{{ route('logout') }}">@csrf<button class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('welcome.nav.logout') }}</button></form>
-            </div>
-        </header>
-
-        <main class="mx-auto max-w-6xl px-5 py-12 sm:px-8">
+<x-labs.shell :title="__('state_transition.page.title')" :description="__('state_transition.page.description')">
+        <main id="main-content" class="mx-auto max-w-6xl px-5 py-12 sm:px-8">
             <a href="{{ route('dashboard') }}" class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ __('state_transition.page.back') }}</a>
 
             <section class="mt-8 max-w-4xl">
@@ -23,6 +7,8 @@
                 <h1 class="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{{ __('state_transition.page.heading') }}</h1>
                 <p class="mt-5 text-base leading-8 text-slate-600">{{ __('state_transition.page.description') }}</p>
             </section>
+
+            <x-labs.learning-overview lab="state-transition" />
 
             <section class="mt-8 grid gap-4 lg:grid-cols-3" aria-label="{{ __('state_transition.flow.aria_label') }}">
                 <article class="rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
@@ -46,7 +32,7 @@
                 <div role="status" class="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</div>
             @endif
 
-            <section class="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <section id="state-transition-practice" class="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                     <div><p class="font-mono text-xs uppercase tracking-wider text-slate-400">{{ __('state_transition.create.eyebrow') }}</p><h2 class="mt-2 text-xl font-semibold">{{ __('state_transition.create.title') }}</h2></div>
                     <p class="max-w-md text-sm leading-6 text-slate-500">{{ __('state_transition.create.description') }}</p>
@@ -137,5 +123,4 @@
                 @endif
             </section>
         </main>
-    </body>
-</html>
+</x-labs.shell>

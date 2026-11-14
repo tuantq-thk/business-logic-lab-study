@@ -24,6 +24,8 @@ return [
         'title' => ':label · :brand',
         'logout' => 'Đăng xuất',
         'back' => '← Quay lại catalog',
+        'skip_to_content' => 'Đi đến nội dung chính',
+        'back_to_top' => 'Về đầu trang',
         'question' => 'Câu hỏi trung tâm',
         'description' => 'Lab này đã được mở trong catalog. Phần scenario và bằng chứng sẽ được xây tiếp theo đúng contract của BL-01.',
     ],

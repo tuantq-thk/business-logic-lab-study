@@ -124,14 +124,35 @@ test('contextual validation route renders policy explanation and event state', f
     $event = WorkshopEvent::factory()->create(['title' => 'Context event demo']);
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    $response = $this->actingAs($user)
         ->get(route('labs.contextual-validation.index'))
         ->assertOk()
         ->assertSee(__('contextual_validation.learning.theory_title'))
         ->assertSee(__('contextual_validation.learning.examples_title'))
+        ->assertSee(__('lab_learning.layers.title'))
+        ->assertSee(__('lab_learning.layers.items.1.title'))
+        ->assertSee(__('lab_advanced.contextual-validation.performance_title'))
+        ->assertSee(__('lab_advanced.contextual-validation.maturity_title'))
         ->assertSee(__('contextual_validation.events.how_to'))
         ->assertSee('StoreEventRegistrationRequest')
+        ->assertSee('lab-reading-progress')
+        ->assertSee('lab-back-to-top')
+        ->assertSee('lab-mini-toc')
+        ->assertSee('application/ld+json')
+        ->assertSee('href="#contextual-validation-invariant"', false)
+        ->assertSee('href="#contextual-validation-review"', false)
+        ->assertSee(__('lab_advanced.evidence_status.verified'))
+        ->assertSee('property="og:title"', false)
         ->assertSee($event->title);
+
+    expect(substr_count($response->getContent(), 'id="contextual-validation-data-contract"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'id="contextual-validation-test-evidence"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'id="contextual-validation-maturity"'))->toBe(1);
+
+    preg_match_all('/href="#([^"]+)"/', $response->getContent(), $links);
+    preg_match_all('/id="([^"]+)"/', $response->getContent(), $ids);
+
+    expect(array_values(array_diff(array_unique($links[1]), array_unique($ids[1]))))->toBe([]);
 });
 
 test('contextual validation registration maps business conflict to localized feedback', function () {
@@ -147,7 +168,7 @@ test('contextual validation registration maps business conflict to localized fee
             'event_id' => $event->id,
             'ticket_type' => TicketType::Standard->value,
         ])
-        ->assertRedirect(route('labs.contextual-validation.index').'#practice')
+        ->assertRedirect(route('labs.contextual-validation.index').'#contextual-validation-practice')
         ->assertSessionHasErrors(['registration' => __('contextual_validation.errors.duplicate')]);
 });
 
@@ -164,6 +185,6 @@ test('successful registration redirects back to the practice section', function 
             'event_id' => $event->id,
             'ticket_type' => TicketType::Standard->value,
         ])
-        ->assertRedirect(route('labs.contextual-validation.index').'#practice')
+        ->assertRedirect(route('labs.contextual-validation.index').'#contextual-validation-practice')
         ->assertSessionHas('status', __('contextual_validation.flash.registered'));
 });

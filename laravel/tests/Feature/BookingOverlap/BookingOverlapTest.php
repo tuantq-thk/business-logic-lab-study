@@ -86,12 +86,31 @@ test('booking lab route is reachable and catalog enabled', function () {
     $user = User::factory()->create();
     app(CreateRoomBooking::class)->handle($room, $user, bookingInterval());
 
-    $this->actingAs($user)
+    $response = $this->actingAs($user)
         ->get(route('labs.booking-overlap.index', ['room_id' => $room->id, 'date' => '2030-01-07']))
         ->assertOk()
         ->assertSee(__('booking_overlap.slots.title'))
         ->assertSee(__('booking_overlap.bookings.title'))
+        ->assertSee(__('booking_overlap.learning.examples_title'))
+        ->assertSee(__('lab_learning.layers.title'))
+        ->assertSee(__('lab_learning.layers.items.0.title'))
+        ->assertSee(__('lab_advanced.booking-overlap.data_title'))
+        ->assertSee(__('lab_advanced.booking-overlap.test_title'))
+        ->assertSee(__('lab_advanced.booking-overlap.observability_title'))
+        ->assertSee('href="#booking-overlap-invariant"', false)
+        ->assertSee('href="#booking-overlap-test-evidence"', false)
+        ->assertSee(__('lab_advanced.evidence_status.not_covered'))
+        ->assertSee('assertNoActiveOverlap')
         ->assertSee('09:00');
+
+    expect(substr_count($response->getContent(), 'id="booking-overlap-data-contract"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'id="booking-overlap-test-evidence"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'id="booking-overlap-observability"'))->toBe(1);
+
+    preg_match_all('/href="#([^"]+)"/', $response->getContent(), $links);
+    preg_match_all('/id="([^"]+)"/', $response->getContent(), $ids);
+
+    expect(array_values(array_diff(array_unique($links[1]), array_unique($ids[1]))))->toBe([]);
 });
 
 test('booked slots are hidden from other learners while their booking data stays private', function () {

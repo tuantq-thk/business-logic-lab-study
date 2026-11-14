@@ -94,16 +94,16 @@ test('an admin can toggle an implemented lab while the catalog remains enabled',
         ->assertNotFound();
 });
 
-test('an admin cannot enable an unimplemented lab', function () {
+test('an admin cannot enable an unknown lab', function () {
     $admin = createAdminUser();
 
     $this->actingAs($admin)
-        ->patch('/admin/catalog/labs/inventory-capacity', ['enabled' => true])
+        ->patch('/admin/catalog/labs/does-not-exist', ['enabled' => true])
         ->assertNotFound();
 
     $this->assertDatabaseHas('catalog_settings', [
         'key' => 'inventory-capacity',
-        'enabled' => null,
+        'implemented' => true,
     ]);
 });
 

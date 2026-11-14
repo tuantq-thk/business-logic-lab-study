@@ -63,17 +63,24 @@ test('an unknown lab key is rejected', function () {
         ->assertNotFound();
 });
 
-test('an unimplemented lab is not exposed or reachable', function () {
+test('the inventory lab is exposed and reachable when enabled', function () {
     CatalogSetting::query()->where('key', CatalogSetting::CATALOG_KEY)->update(['enabled' => true]);
 
-    $this->actingAs(User::factory()->create())
+    $learner = User::factory()->create();
+
+    $this->actingAs($learner)
         ->get('/home')
         ->assertOk()
-        ->assertDontSee('inventory-capacity');
+        ->assertSee('inventory-capacity');
 
-    $this->actingAs(User::factory()->create())
+    $this->actingAs($learner)
         ->get('/catalog/labs/inventory-capacity')
-        ->assertNotFound();
+        ->assertOk();
+
+    $this->actingAs($learner)
+        ->get(route('labs.inventory-capacity.index'))
+        ->assertOk()
+        ->assertSee('Giữ đơn vị cuối mà không bán vượt tồn');
 });
 
 test('catalog metadata follows the active application locale', function () {

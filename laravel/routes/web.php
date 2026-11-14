@@ -2,6 +2,7 @@
 
 use App\Features\BookingOverlap\Http\Controllers\BookingOverlapController;
 use App\Features\BusinessCalendarSlots\Http\Controllers\BusinessCalendarSlotsController;
+use App\Features\ContextualValidation\Http\Controllers\ContextualValidationController;
 use App\Features\InventoryCapacity\Http\Controllers\InventoryCapacityController;
 use App\Features\PricingDiscounts\Http\Controllers\Admin\PricingPromotionController;
 use App\Features\PricingDiscounts\Http\Controllers\PricingDiscountsController;
@@ -76,6 +77,14 @@ Route::delete('/labs/booking-overlap/bookings/{booking}', [BookingOverlapControl
     ->middleware(['auth', 'lab.available', 'throttle:booking-mutations'])
     ->defaults('labKey', 'booking-overlap')
     ->name('labs.booking-overlap.cancel');
+Route::get('/labs/contextual-validation', [ContextualValidationController::class, 'index'])
+    ->middleware(['auth', 'lab.available'])
+    ->defaults('labKey', 'contextual-validation')
+    ->name('labs.contextual-validation.index');
+Route::post('/labs/contextual-validation/registrations', [ContextualValidationController::class, 'store'])
+    ->middleware(['auth', 'lab.available', 'throttle:contextual-validation-mutations'])
+    ->defaults('labKey', 'contextual-validation')
+    ->name('labs.contextual-validation.store');
 Route::patch('/labs/state-transition/tickets/{ticket}/transition', [StateTransitionController::class, 'changeStatus'])
     ->middleware(['auth', 'lab.available'])
     ->defaults('labKey', 'state-transition')

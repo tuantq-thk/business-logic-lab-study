@@ -60,5 +60,16 @@ return [
             'toggleable' => true,
             'route_names' => ['labs.booking-overlap.index'],
         ],
+        'contextual-validation' => [
+            'key' => 'contextual-validation',
+            'label_key' => 'labs.contextual_validation.label',
+            'description_key' => 'labs.contextual_validation.description',
+            'group_key' => 'labs.contextual_validation.group',
+            'question_key' => 'labs.contextual_validation.question',
+            'implemented' => true,
+            'default_enabled' => true,
+            'toggleable' => true,
+            'route_names' => ['labs.contextual-validation.index'],
+        ],
     ],
 ];

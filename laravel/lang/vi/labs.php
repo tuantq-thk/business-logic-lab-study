@@ -31,4 +31,10 @@ return [
         'group' => 'Đặt lịch / concurrency',
         'question' => 'Các request đồng thời có thể tạo booking bị trùng không?',
     ],
+    'contextual_validation' => [
+        'label' => 'Validation theo ngữ cảnh',
+        'description' => 'Tách input sai định dạng khỏi input đúng nhưng không đạt policy nghiệp vụ hiện tại.',
+        'group' => 'Validation và điều kiện tham gia',
+        'question' => 'Khi nào input hợp lệ vẫn bị từ chối bởi policy của sự kiện?',
+    ],
 ];

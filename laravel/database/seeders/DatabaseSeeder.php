@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Seeders\ContextualValidation\ContextualValidationSeeder;
 use Database\Seeders\StateTransition\StateTransitionSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -27,5 +28,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PricingDiscountsSeeder::class);
         $this->call(InventoryCapacitySeeder::class);
         $this->call(BusinessCalendarSlotsSeeder::class);
+        $this->call(ContextualValidationSeeder::class);
     }
 }

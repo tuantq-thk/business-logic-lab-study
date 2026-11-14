@@ -45,6 +45,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)
                 ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
         });
+
+        RateLimiter::for('contextual-validation-mutations', function (Request $request): Limit {
+            return Limit::perMinute(30)
+                ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
     }
 }
 use App\Features\BookingOverlap\Models\RoomBooking;

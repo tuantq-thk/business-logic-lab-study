@@ -31,4 +31,10 @@ return [
         'group' => 'Booking / concurrency',
         'question' => 'Can concurrent requests create overlapping bookings?',
     ],
+    'contextual_validation' => [
+        'label' => 'Contextual validation',
+        'description' => 'Separate malformed input from valid input that fails the current business policy.',
+        'group' => 'Validation and eligibility',
+        'question' => 'When does valid input still fail the current event policy?',
+    ],
 ];

@@ -3,14 +3,14 @@
 > **Vai trò:** lab đầu tiên của learning shell  
 > **Domain minh họa:** chính thư viện bài học  
 > **Nhóm:** feature availability, authorization, configuration  
-> **Trạng thái:** kế hoạch phân tích; chưa phải implementation evidence  
+> **Trạng thái:** implemented locally; evidence-backed cho catalog/gate/admin flow
 > **Mục tiêu:** phân biệt feature catalog, feature flag, quyền truy cập và trạng thái triển khai; thiết kế một toggle có backend enforcement.
 
 ## 1. Bài toán và phạm vi
 
 Repo có nhiều bài demo nhưng không phải bài nào cũng đã code xong hoặc nên hiển thị cho mọi người. Người quản trị cần bật/tắt khả năng truy cập một lab khi demo. Người dùng cần nhìn thấy lab khả dụng trong menu. Khi lab bị tắt, truy cập URL trực tiếp hoặc gọi endpoint không được thực thi use case.
 
-**Phạm vi MVP:** catalog đăng ký lab; state `implemented` và `enabled`; trang admin toggle; menu frontend nhận danh sách khả dụng từ backend; server-side gate; audit thay đổi; test an toàn.
+**Phạm vi MVP:** catalog đăng ký lab; state `implemented` và `enabled`; trang admin toggle; menu frontend nhận danh sách khả dụng từ backend; server-side gate; provenance của lần thay đổi gần nhất; test an toàn. Append-only audit history là phần mở rộng chưa triển khai.
 
 **Ngoài phạm vi MVP:** percentage rollout, targeting theo user/tenant, A/B test, remote flag SaaS, multivariate config, kill switch cho từng class/method, feature flag client-side độc lập.
 
@@ -44,8 +44,8 @@ Không dùng một boolean `active` để đồng thời diễn tả implemented
 | BR-00-04 | Chỉ admin được thay đổi enabled state. | Authentication + policy trên endpoint. |
 | BR-00-05 | Toggle không cấp permission nghiệp vụ. | Mọi use case vẫn kiểm tra authorization riêng. |
 | BR-00-06 | Core catalog/admin route không thể tự disable. | Registry đánh dấu non-toggleable; UI và server cùng enforce. |
-| BR-00-07 | Admin change và audit entry cùng commit. | Transaction DB. |
-| BR-00-08 | Mọi lần đổi state có actor, old/new value và thời điểm. | Audit append-only. |
+| BR-00-07 | Admin change và metadata của lần thay đổi cùng commit. | Transaction DB. |
+| BR-00-08 | State hiện tại có actor/reason/thời điểm thay đổi gần nhất. | `catalog_settings`; append-only audit history chưa có. |
 | BR-00-09 | Giá trị flag key lạ trong DB hoặc request bị fail closed và được quan sát. | Resolver/validation; không tự enable theo input. |
 | BR-00-10 | Menu phản ánh cùng nguồn cấu hình backend với route gate. | Inertia props/API response từ resolver server. |
 
@@ -96,7 +96,7 @@ Key là identifier ổn định, lowercase dotted slug. Đổi label không đ�
 
 `NULL row` nên có nghĩa **không override**, không cần ghi default vào DB cho mọi registry item. Effective value: `override ?? registry.default_enabled`. Với mẫu đơn giản, `enabled` non-null khi row tồn tại.
 
-### `feature_flag_audits`
+### `feature_flag_audits` — thiết kế mở rộng, chưa có trong MVP hiện tại
 
 | Field | Gợi ý | Lý do |
 |---|---|---|
@@ -242,7 +242,7 @@ Fail-safe không có nghĩa “tắt toàn bộ app khi DB/cache lỗi”. Chọ
 
 **Khuyến nghị:** bắt đầu registry tĩnh; thêm DB override khi có UI/runtime need. Toggle lab không cần percentage rollout. Không dùng feature flag thay migration/deployment strategy.
 
-## 13. Test plan
+## 13. Test plan và evidence hiện tại
 
 - Registry keys unique, metadata schema hợp lệ.
 - Default effective state khi chưa có override.
@@ -250,12 +250,25 @@ Fail-safe không có nghĩa “tắt toàn bộ app khi DB/cache lỗi”. Chọ
 - Unknown key, stale DB key và unimplemented lab không được bật.
 - Direct URL/action khi disabled bị chặn; enabled vẫn phải qua authorization.
 - User không phải admin không toggle được.
-- Toggle và audit atomic; rollback nếu audit insert lỗi.
+- Toggle và provenance update atomic; append-only audit transaction là test cho phase mở rộng.
 - Concurrent admin updates có last-write-wins hoặc optimistic conflict policy rõ.
 - Cache invalidation giữa app instances nếu cache thực sự được bật.
 - Core admin route vẫn hoạt động khi các lab khác tắt.
 
 Feature/unit tests kiểm logic registry; MySQL integration tests cho unique/transaction; test cache/worker phù hợp runtime thật. Không cần test concurrency nếu app đơn user và toggle chỉ là config deploy-time.
+
+### Evidence đã có
+
+- Registry typed contract và translation keys được kiểm tra cho locale `vi`/`en`.
+- Global catalog/per-lab toggle, direct URL disabled, unknown/unimplemented lab và admin authorization có feature tests.
+- Full suite hiện tại: 61 tests, 341 assertions trên SQLite.
+- Technical record ghi thêm kết quả MySQL migration/route/build ở lần verification đã thực hiện.
+
+### Giới hạn còn lại
+
+- Chưa có append-only audit history cho từng lần toggle; chỉ lưu provenance gần nhất.
+- Chưa có distributed cache invalidation, browser visual/accessibility QA hoặc concurrency policy cho hai admin toggle đồng thời.
+- Cần chạy lại MySQL trong môi trường hiện tại trước khi dùng kết quả đó như evidence mới nhất.
 
 ## 14. Thứ tự triển khai
 
@@ -276,6 +289,8 @@ Feature/unit tests kiểm logic registry; MySQL integration tests cho unique/tra
 - Unknown/unimplemented/core key được xử lý đúng.
 - Audit và override không lệch nhau.
 - Có hướng dẫn reset/dev seed và test evidence khi implementation hoàn tất.
+
+BL-00 hiện đạt phần catalog/gate/admin MVP; append-only audit history vẫn là out-of-scope có chủ ý.
 
 ## 15. Câu hỏi review
 

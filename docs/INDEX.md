@@ -2,12 +2,12 @@
 
 ## Learning shell
 
-- [BL-00 — Feature Catalog và bật/tắt lab](labs/00-feature-catalog-toggle.md) — bài đầu tiên để quản lý khả năng demo và bảo vệ backend.
+- [BL-00 — Feature Catalog và bật/tắt lab](labs/00-feature-catalog-toggle.md) — `implemented locally`; bài đầu tiên để quản lý khả năng demo và bảo vệ backend.
 
 ## Business logic labs
 
-- [BL-01 — State transition và invariant](labs/01-state-transition.md) — phiếu hỗ trợ.
-- [BL-02 — Giá, giảm giá và thứ tự áp dụng](labs/02-pricing-discounts.md) — giỏ hàng sách.
+- [BL-01 — State transition và invariant](labs/01-state-transition.md) — `evidence-backed locally`; phiếu hỗ trợ.
+- [BL-02 — Giá, giảm giá và thứ tự áp dụng](labs/02-pricing-discounts.md) — `evidence-backed locally`; giỏ hàng sách.
 - [BL-03 — Tồn kho, giữ hàng và capacity](labs/03-inventory-capacity.md) — kho cửa hàng.
 - [BL-04 — Lịch làm việc, ngày nghỉ và sinh slot](labs/04-business-calendar-slots.md) — phòng họp.
 - [BL-05 — Overlap và đặt lịch chống trùng](labs/05-booking-overlap.md) — lịch phòng theo resource.
@@ -32,6 +32,12 @@
 - [Template phân tích chuyên sâu](TEMPLATE.md)
 - [UI Guide](UI_GUIDE.md)
 - [Roadmap](PLAN.md)
+
+## Cách đọc trạng thái
+
+- `planned`: mới có phân tích/blueprint, chưa có implementation evidence.
+- `implemented locally`: đã có code và test local, nhưng evidence hoặc giới hạn vẫn còn hẹp.
+- `evidence-backed locally`: claim chính đã được kiểm tra trong runtime được ghi ở technical record; không đồng nghĩa production-ready.
 
 ## Technical implementation records
 

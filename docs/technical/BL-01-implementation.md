@@ -2,7 +2,7 @@
 
 > Cập nhật: 2026-11-13  
 > Phạm vi: `laravel/`  
-> Trạng thái: implemented locally; chưa commit release.
+> Trạng thái: evidence-backed locally; source đã có commit; chưa phải production-ready.
 
 ## 1. Mục tiêu và business decision
 
@@ -239,7 +239,7 @@ Các file contract bị ảnh hưởng trong hardening gần nhất:
 
 Coverage gồm admin/owner authorization, out-of-scope request, full transition matrix 4 × 4, stale conflict, history provenance, mass-assignment protection, history update/delete rejection, ticket delete protection, seeder consistency, rollback khi history fail, UI status control và `visibleTo()` resource scope.
 
-Evidence:
+Evidence record:
 
 | Kiểm tra | Kết quả |
 |---|---|
@@ -251,7 +251,7 @@ Evidence:
 | `git diff --check` | Passed |
 | Concurrency harness | Parent commit; child stale conflict; final state/version/history nhất quán |
 
-Concurrency output:
+Concurrency output (verification record trước đó):
 
 ```text
 child=App\Features\StateTransition\Exceptions\StaleTicket

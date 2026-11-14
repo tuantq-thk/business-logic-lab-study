@@ -2,7 +2,7 @@
 
 > Cập nhật: 2026-11-13  
 > Phạm vi: `laravel/`  
-> Trạng thái: implemented locally; chưa commit release.
+> Trạng thái: implemented locally; source đã có commit; chưa phải production-ready.
 
 ## 1. Mục tiêu và state model
 
@@ -135,7 +135,7 @@ BL-00 giữ ở application-level shared folders vì catalog/learning shell là 
 
 ## 7. Evidence và giới hạn
 
-BL-00 có feature tests cho catalog visibility/admin behavior và locale/key persistence. Verification suite hiện tại đã pass: full Pest 61 tests / 341 assertions trên SQLite và MySQL, bao gồm registry translation validation và BL-02 route; migration up/down trên SQLite, route list, Pint, Vite build và `git diff --check` cũng đã pass.
+BL-00 có feature tests cho catalog visibility/admin behavior và locale/key persistence. Verification record đã ghi nhận full Pest 61 tests / 341 assertions trên SQLite và MySQL, bao gồm registry translation validation và BL-02 route; migration up/down trên SQLite, route list, Pint, Vite build và `git diff --check` cũng đã pass. Lần kiểm tra hiện tại trong workspace mới xác nhận lại SQLite; cần chạy lại MySQL nếu dùng làm evidence mới nhất.
 
 Chưa nằm trong scope:
 

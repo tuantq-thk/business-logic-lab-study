@@ -2,7 +2,7 @@
 
 > Cập nhật: 2026-11-13
 > Phạm vi: `laravel/`
-> Trạng thái: evidence-backed locally; chưa commit/push.
+> Trạng thái: evidence-backed locally; source đã có commit; chưa phải production-ready.
 
 ## 1. Mục tiêu và boundary
 
@@ -101,7 +101,7 @@ Verification hiện tại:
 |---|---|
 | Pricing-specific Pest trên SQLite | 23 tests, 110 assertions passed |
 | Full Pest trên SQLite | 61 tests, 341 assertions passed |
-| Full Pest trên MySQL `laravel-test` | 61 tests, 341 assertions passed |
+| Full Pest trên MySQL `laravel-test` | 61 tests, 341 assertions passed trong verification record trước đó; cần chạy lại để xác nhận workspace hiện tại |
 | MySQL migration `130005` down/up | Passed; CHECK constraints rollback và apply lại trên `laravel-test` |
 | Pint (`--dirty --test`) | Passed |
 | Vite production build | Passed; có cảnh báo optional `fontaine` từ plugin fonts |

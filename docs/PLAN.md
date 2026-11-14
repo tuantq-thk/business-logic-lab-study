@@ -112,7 +112,7 @@ README.md                         # định hướng và navigation
  docs/decisions/ADR-NNN-*.md      # chỉ khi implementation chốt lựa chọn
 ```
 
-Chưa chứa implementation Laravel. Khi repo code được khởi tạo, không cần ép code vào docs repo nếu đó làm tài liệu khó học; có thể giữ docs và source cùng repo hoặc link source repo khác, nhưng phải version/commit-pin evidence.
+Source Laravel hiện nằm cùng repo trong `laravel/`. Technical implementation records dùng để nối tài liệu phân tích với folder, route, migration, test và verification; mỗi record phải ghi rõ commit/runtime/evidence và giới hạn. Không copy toàn bộ code vào docs vì source là nơi canonical.
 
 ## 7. Tiêu chí ưu tiên lab kế tiếp
 
@@ -131,7 +131,7 @@ Các câu hỏi không chặn việc dùng bộ tài liệu này; chúng cần �
 ## 9. Exit criteria của roadmap
 
 - Mỗi lab trong catalog có tài liệu theo template chung; catalog có thể mở rộng.
-- Ít nhất một lab được triển khai end-to-end và review evidence trước khi mở rộng quá rộng.
+- BL-00, BL-01 và BL-02 đã được triển khai end-to-end ở mức local/evidence-backed; trước khi mở rộng tiếp cần giữ technical records và kiểm tra lại các claim engine-specific.
 - Mỗi tài liệu ghi rõ trạng thái planning vs implemented vs verified.
 - Chỉ claim đã kiểm chứng khi có command, environment, result và limits.
 - Có thể thêm lab mới mà không đổi cấu trúc tất cả bài cũ.

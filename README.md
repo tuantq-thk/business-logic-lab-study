@@ -12,7 +12,7 @@ Mỗi lab là một lát cắt độc lập. Ví dụ có thể dùng support ti
 - Nhận biết race condition, retry, quyền truy cập và failure modes.
 - Bảo vệ quyết định bằng test/evidence thay vì chỉ trình bày thuật ngữ.
 
-> 📌 Repo hiện là tài liệu phân tích và blueprint triển khai. Các đề xuất migration/model/factory/seeder chưa phải source Laravel đã chạy; mỗi bài cần ghi bằng chứng thực tế trước khi được xem là verified.
+> 📌 Repo hiện gồm cả tài liệu phân tích và một Laravel learning shell đang chạy. BL-00, BL-01 và BL-02 đã có implementation trong `laravel/`; trạng thái evidence và giới hạn của từng bài được ghi trong technical implementation record. Các BL còn lại vẫn là blueprint, không được hiểu là đã triển khai.
 
 ## 🧭 Bắt đầu ở đây
 
@@ -21,6 +21,21 @@ Mỗi lab là một lát cắt độc lập. Ví dụ có thể dùng support ti
 3. Tham khảo [UI Guide](docs/UI_GUIDE.md) để hiểu menu, trang lab, trạng thái giao diện và ranh giới frontend/backend.
 4. Dùng [Template phân tích](docs/TEMPLATE.md) khi thêm hoặc review một lab.
 5. Chọn bài trong [Mục lục lab](docs/INDEX.md) theo logic muốn luyện.
+
+### Nếu muốn chạy code
+
+```bash
+cd laravel
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm install
+npm run build
+php artisan test --compact
+```
+
+PHP/Laravel version, database setup, seed policy và các giới hạn verification được ghi trong [Laravel learning shell README](laravel/README.md).
 
 ## 🧪 Các chủ đề đang có
 
@@ -54,6 +69,18 @@ Mục lục và danh sách bài có thể mở rộng theo nhu cầu; README kh�
 - Feature toggle điều khiển khả năng mở lab; không cấp quyền nghiệp vụ.
 - Dùng MySQL cho bằng chứng phụ thuộc MySQL; không suy rộng từ SQLite.
 - Không ghi “đã kiểm chứng” nếu mới có kế hoạch test.
+
+## 📍 Trạng thái hiện tại
+
+| Phần | Trạng thái | Bằng chứng/chú ý |
+|---|---|---|
+| Authentication và learning shell | implemented | Fortify + Blade, feature tests |
+| BL-00 Catalog & Toggle | implemented locally | Runtime catalog/admin gate; chưa có append-only toggle audit |
+| BL-01 State transition | evidence-backed locally | Transaction, row lock, optimistic version và stale-conflict harness |
+| BL-02 Pricing & discounts | evidence-backed locally | Pure rules, quote snapshot, promotion CRUD; chưa có checkout/concurrency |
+| BL-03–BL-20 | planned | Chỉ có tài liệu phân tích |
+
+“Evidence-backed” ở đây nghĩa là claim được kiểm tra trong runtime đã ghi, không có nghĩa production-ready. SQLite không thay thế evidence MySQL cho locking, isolation, index plan hoặc constraint semantics.
 
 ## 🖥️ Demo UI và công nghệ
 

@@ -2,7 +2,7 @@
 
 > **Domain minh họa:** Phiếu hỗ trợ (support ticket)  
 > **Nhóm:** state / transition  
-> **Trạng thái:** kế hoạch phân tích; chưa phải evidence triển khai  
+> **Trạng thái:** evidence-backed locally; implementation đã có trong `laravel/app/Features/StateTransition`
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
 ## 1. Tóm tắt và phạm vi
@@ -11,17 +11,17 @@
 
 **Phạm vi:** một use case cốt lõi và các trường hợp biên dưới đây. **Ngoài phạm vi:** UI sản phẩm hoàn chỉnh, tích hợp provider thật, multi-tenant phức tạp hoặc abstraction tổng quát trừ khi lab cần để chứng minh rule. Domain chỉ là phương tiện học; không dùng entity của lab khác nếu không có quan hệ nghiệp vụ thật.
 
-**Actor:** Khách gửi phiếu; nhân viên tiếp nhận; quản lý đóng/mở lại phiếu.
+**Actor trong implementation hiện tại:** user sở hữu ticket (`created_by`) hoặc admin. Mô hình `manager/staff` trong bản phân tích ban đầu chưa được triển khai và không nên dùng khi đọc code hiện tại.
 
 ## 2. Quy tắc nghiệp vụ và invariant
 
 | ID | Quy tắc | Cách hiểu/điểm cần chốt |
 |---|---|---|
-| BR-01-01 | Phiếu mới bắt đầu ở `open`. | Chốt boundary, actor và thời điểm áp dụng trong test. |
-| BR-01-02 | Nhân viên có thể `open → in_progress`; chỉ người có quyền xử lý phiếu mới được thao tác. | Chốt boundary, actor và thời điểm áp dụng trong test. |
-| BR-01-03 | Chỉ phiếu đã xử lý mới được `in_progress → resolved`; đóng phiếu là hành động riêng `resolved → closed`. | Chốt boundary, actor và thời điểm áp dụng trong test. |
-| BR-01-04 | `closed` không được sửa nội dung xử lý; mở lại cần quyền và lý do. | Chốt boundary, actor và thời điểm áp dụng trong test. |
-| BR-01-05 | Mỗi chuyển trạng thái hợp lệ ghi một history cùng transaction với cập nhật ticket. | Chốt boundary, actor và thời điểm áp dụng trong test. |
+| BR-01-01 | Phiếu mới bắt đầu ở `open`, version `0` và có initial history. | `CreateSupportTicket` transaction. |
+| BR-01-02 | Owner/admin có thể `open → in_progress`; chỉ actor được authorize mới được thao tác. | `SupportTicketPolicy::changeStatus`. |
+| BR-01-03 | Chỉ `in_progress` được `resolved`; đóng phiếu là hành động riêng `resolved → closed`. | Enum transition table + action. |
+| BR-01-04 | `closed → open` cần actor được authorize và reason; no-op/transition chéo bị reject. | Domain exceptions + request/action. |
+| BR-01-05 | Mỗi chuyển trạng thái hợp lệ ghi một history cùng transaction với cập nhật ticket. | `ChangeSupportTicketStatus` + rollback test. |
 
 ### Invariants
 
@@ -37,13 +37,13 @@
 - **SC-01-03:** Ép lỗi insert history để xác nhận ticket update rollback.
 - **SC-01-04:** Hai request cùng transition: một kết quả thành công, request stale bị conflict/không tạo history sai.
 
-Trước khi code, lập decision table nối mỗi scenario với rule ID, expected result, error code và side effect. Không gom các lỗi nghiệp vụ khác nhau thành một thông báo chung nếu người dùng có thể xử lý khác nhau.
+Decision table của lab nối mỗi scenario với rule ID, expected result, error code và side effect. Không gom các lỗi nghiệp vụ khác nhau thành một thông báo chung nếu người dùng có thể xử lý khác nhau.
 
 ## 4. Mô hình dữ liệu tối thiểu
 
 | Bảng | Field gợi ý | Ý nghĩa và bảo vệ rule |
 |---|---|---|
-| `support_tickets` | `id, subject, status, assigned_to nullable, created_by, resolved_at nullable` | status là trạng thái hiện tại; subject chỉ là nội dung tối thiểu. |
+| `support_tickets` | `id, subject, status, assigned_to nullable, created_by, resolved_at nullable, version` | status là trạng thái hiện tại; version bảo vệ stale update. |
 | `ticket_status_histories` | `id, ticket_id, from_status nullable, to_status, actor_id, reason nullable, created_at` | history append-only; index (ticket_id, created_at, id). |
 
 ### Relationship và source of truth
@@ -60,7 +60,7 @@ Tạo `support_tickets` và `ticket_status_histories`; FK history→ticket và a
 
 ### Model và ranh giới logic
 
-`SupportTicket` enum/cast trạng thái, quan hệ histories và assignee. `TicketStatusHistory` không expose update/delete. Transition nằm trong `TransitionSupportTicket` use case/domain service, không cho `$ticket->status = ...` từ controller.
+`SupportTicket` enum/cast trạng thái, quan hệ histories và assignee. `TicketStatusHistory` không expose update/delete. Transition nằm trong `ChangeSupportTicketStatus` action, không cho `$ticket->status = ...` từ controller; authoritative fields không được mass-assign.
 
 ### Factory
 
@@ -145,13 +145,25 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 | Concurrency | Hai connection/process nếu invariant có race | Harness, barriers, số lần lặp, outcome |
 | Async/external | Queue/provider failure/retry nếu áp dụng | Fake/real service, retry configuration, limits |
 
-- [ ] Transition matrix: mọi cặp hợp lệ/không hợp lệ.
-- [ ] Actor đúng/sai quyền; ID ticket ngoài phạm vi.
-- [ ] History được ghi đúng actor/from/to/reason.
-- [ ] Ép lỗi insert history để xác nhận ticket update rollback.
-- [ ] Hai request cùng transition: một kết quả thành công, request stale bị conflict/không tạo history sai.
+- [x] Transition matrix: mọi cặp hợp lệ/không hợp lệ.
+- [x] Actor đúng/sai quyền; ID ticket ngoài phạm vi.
+- [x] History được ghi đúng actor/from/to/reason.
+- [x] Ép lỗi insert history để xác nhận ticket update rollback.
+- [x] Hai request cùng transition: một kết quả thành công, request stale bị conflict/không tạo history sai.
 
-Đây là **kế hoạch test**, không phải khẳng định tests đã chạy. Khi triển khai cần ghi kết quả, runtime/DB cụ thể và giới hạn. Unit test không chứng minh locking, collation, transaction isolation hay queue driver behavior.
+### Evidence hiện tại
+
+- Transition matrix, authorization, history provenance, mass-assignment boundary, history immutability và rollback khi history insert lỗi đã có feature tests.
+- Action dùng transaction, `lockForUpdate()`, optimistic `version` và re-authorize sau khi lock.
+- Full suite hiện tại: 61 tests, 341 assertions trên SQLite.
+- Technical record ghi MySQL suite và concurrency harness đã chạy trong verification trước đó.
+
+### Giới hạn hiện tại
+
+- Append-only history mới được bảo vệ ở application level; raw SQL/database account đặc quyền vẫn có thể bypass model events.
+- Chưa có database trigger/privilege model cho compliance audit.
+- Actor model hiện chỉ là owner/admin; staff/manager, SLA và notification chưa thuộc scope.
+- Cần chạy lại MySQL trong môi trường hiện tại trước khi dùng kết quả đó như evidence mới nhất. Unit test không chứng minh locking, isolation hoặc engine semantics.
 
 ## 13. Failure modes, edge cases và mở rộng
 

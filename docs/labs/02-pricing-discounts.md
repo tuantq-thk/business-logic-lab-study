@@ -2,7 +2,7 @@
 
 > **Domain minh họa:** Giỏ hàng đặt mua sách  
 > **Nhóm:** pricing / discounts  
-> **Trạng thái:** implemented locally; evidence-backed sau khi chạy verification ghi dưới đây
+> **Trạng thái:** evidence-backed locally; implementation đã có trong `laravel/app/Features/PricingDiscounts`
 > **Độ khó:** nền tảng đến trung cấp  
 > **Mục tiêu:** phân tích được rule, dữ liệu tối thiểu và cách chứng minh hành vi bằng code/test.
 ## 1. Tóm tắt và phạm vi
@@ -34,10 +34,10 @@
 - **SC-02-00:** Bảng test subtotal, fixed/percentage, threshold, stacking/exclusion.
 - **SC-02-01:** Boundary starts/ends; quantity 0/âm; promotion hết hạn.
 - **SC-02-02:** Rounding từng line vs tổng đơn; đảm bảo chọn một policy.
-- **SC-02-03:** Quote giữ giá cũ sau catalog đổi; checkout reprice theo chính sách.
+- **SC-02-03:** Quote giữ giá và discount snapshot sau khi catalog đổi; checkout/reprice là bài toán phase sau.
 - **SC-02-04:** Không thể áp code khác currency hoặc vượt mức giảm.
 
-Trước khi code, lập decision table nối mỗi scenario với rule ID, expected result, error code và side effect. Không gom các lỗi nghiệp vụ khác nhau thành một thông báo chung nếu người dùng có thể xử lý khác nhau.
+Decision table của lab nối mỗi scenario với rule ID, expected result, error code và side effect. Không gom các lỗi nghiệp vụ khác nhau thành một thông báo chung nếu người dùng có thể xử lý khác nhau.
 
 ## 4. Mô hình dữ liệu tối thiểu
 
@@ -115,7 +115,7 @@ laravel/app/Features/PricingDiscounts/
 
 Normalize input → load authoritative catalog/policy → validate quantity/scope → build immutable quote → apply rules theo priority → round theo currency policy → persist quote snapshot khi checkout. Reprice lúc checkout nếu quote hết hạn; trả diff thay âm thầm tính khác.
 
-Input cần normalize một lần; thời gian/clock, rounding hoặc key generation nên inject khi cần determinism. Mọi trạng thái có thể thay đổi giữa validation và write cần được đọc lại/khóa/compare trong boundary persistence.
+Input cần normalize một lần; thời gian/clock và rounding nên được cố định để determinism. BL-02 hiện tạo quote snapshot từ catalog tại request và không claim checkout reprice hoặc usage-limit atomicity.
 
 ## 9. Phương án triển khai và trade-off
 
@@ -143,9 +143,9 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 - Không tin identifier, price, status, scope hoặc expiry do client quyết định nếu server là nguồn sự thật.
 - Validate input theo allowlist và giới hạn kích thước; tránh mass assignment.
 - PII/secret trong logs, histories, queues và exports phải có purpose, access, retention.
-- Promotion thay đổi giữa quote và checkout; hai đơn cuối cùng dùng lượt discount cuối; rounding lệch giữa frontend/backend; currency exponent bị giả định 2 chữ số; replay quote cũ.
+- Các phase sau cần xử lý promotion thay đổi giữa quote và checkout, usage limit đồng thời, rounding lệch frontend/backend, currency exponent và replay quote cũ.
 
-## 12. Test plan và bằng chứng cần thu
+## 12. Test plan và evidence
 
 | Tầng | Kiểm tra | Evidence cần ghi |
 |---|---|---|
@@ -155,13 +155,24 @@ Chọn giải pháp đơn giản nhất đáp ứng rule và chứng cứ hiện
 | Concurrency | Hai connection/process nếu invariant có race | Harness, barriers, số lần lặp, outcome |
 | Async/external | Queue/provider failure/retry nếu áp dụng | Fake/real service, retry configuration, limits |
 
-- [ ] Bảng test subtotal, fixed/percentage, threshold, stacking/exclusion.
-- [ ] Boundary starts/ends; quantity 0/âm; promotion hết hạn.
-- [ ] Rounding từng line vs tổng đơn; đảm bảo chọn một policy.
-- [ ] Quote giữ giá cũ sau catalog đổi; checkout reprice theo chính sách.
-- [ ] Không thể áp code khác currency hoặc vượt mức giảm.
+- [x] Bảng test subtotal, fixed/percentage, threshold, stacking/exclusion.
+- [x] Boundary starts/ends; quantity 0/âm; promotion hết hạn.
+- [x] Rounding từng line vs tổng đơn; đảm bảo chọn một policy.
+- [x] Quote giữ giá/discount snapshot sau catalog đổi.
+- [x] Không thể áp code khác currency hoặc vượt mức giảm.
 
-Đây là **kế hoạch test**, không phải khẳng định tests đã chạy. Khi triển khai cần ghi kết quả, runtime/DB cụ thể và giới hạn. Unit test không chứng minh locking, collation, transaction isolation hay queue driver behavior.
+### Evidence hiện tại
+
+- Pure pricing tests bao phủ subtotal, fixed/percentage, half-up rounding, threshold, stacking/exclusive, zero floor và mixed currency.
+- Feature tests bao phủ catalog gate, validation, PRG quote flow, quote snapshot, actor scope, repeated quotes và admin promotion CRUD/permission.
+- Full suite hiện tại: 61 tests, 341 assertions trên SQLite; pricing-specific suite trong technical record: 23 tests, 110 assertions.
+- MySQL integrity checks cho snapshot invariants đã được migration và technical record ghi nhận.
+
+### Giới hạn hiện tại
+
+- Chưa có checkout, payment provider, product admin CRUD, usage limit, reservation hoặc concurrency harness.
+- Currency policy hiện là integer minor unit cho demo USD; chưa chứng minh exponent/rounding policy cho mọi ISO-4217 currency.
+- Chưa có browser visual/accessibility QA. Cần chạy lại MySQL trong môi trường hiện tại trước khi dùng kết quả đó như evidence mới nhất.
 
 ## 13. Failure modes, edge cases và mở rộng
 

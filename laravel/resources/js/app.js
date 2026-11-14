@@ -24,3 +24,19 @@ document.querySelectorAll('[data-quote-form]').forEach((form) => {
         submit.classList.add('cursor-wait', 'opacity-70');
     });
 });
+
+document.querySelectorAll('[data-inventory-form]').forEach((form) => {
+    form.addEventListener('submit', () => {
+        const submit = form.querySelector('[data-inventory-submit]');
+
+        if (! submit) {
+            return;
+        }
+
+        submit.disabled = true;
+        submit.textContent = submit.dataset.loadingLabel;
+        submit.setAttribute('aria-busy', 'true');
+        form.setAttribute('aria-busy', 'true');
+        submit.classList.add('cursor-wait', 'opacity-70');
+    });
+});

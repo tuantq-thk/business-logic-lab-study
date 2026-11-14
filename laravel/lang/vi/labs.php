@@ -9,7 +9,7 @@ return [
     ],
     'inventory_capacity' => [
         'label' => 'Inventory, reservation & capacity',
-        'description' => 'Lab kế tiếp về tồn kho, giữ hàng và xử lý đồng thời.',
+        'description' => 'Giữ counter tồn kho và lifecycle reservation đúng khi request chạy đồng thời.',
         'group' => 'Capacity',
         'question' => 'Làm sao ngăn bán vượt tồn khi nhiều request cùng chạy?',
     ],

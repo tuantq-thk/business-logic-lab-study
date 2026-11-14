@@ -2,10 +2,17 @@
 
 namespace App\Providers;
 
+use App\Features\InventoryCapacity\Models\InventoryItem;
+use App\Features\InventoryCapacity\Models\InventoryReservation;
+use App\Features\InventoryCapacity\Policies\InventoryItemPolicy;
+use App\Features\InventoryCapacity\Policies\InventoryReservationPolicy;
 use App\Features\StateTransition\Models\SupportTicket;
 use App\Features\StateTransition\Policies\SupportTicketPolicy;
 use App\Models\User;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,5 +32,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::define('manage-catalog', fn (User $user): bool => $user->isAdmin());
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+        Gate::policy(InventoryItem::class, InventoryItemPolicy::class);
+        Gate::policy(InventoryReservation::class, InventoryReservationPolicy::class);
+
+        RateLimiter::for('inventory-mutations', function (Request $request): Limit {
+            return Limit::perMinute(30)
+                ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
     }
 }

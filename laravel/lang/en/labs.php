@@ -9,7 +9,7 @@ return [
     ],
     'inventory_capacity' => [
         'label' => 'Inventory, reservation & capacity',
-        'description' => 'The next lab about inventory, reservations and concurrent requests.',
+        'description' => 'Keep inventory counters and reservation lifecycles correct under concurrent requests.',
         'group' => 'Capacity',
         'question' => 'How do we prevent overselling when requests run concurrently?',
     ],

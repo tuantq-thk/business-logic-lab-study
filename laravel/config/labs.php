@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'inventory_capacity' => [
+        'max_items' => 100,
+    ],
     'registry' => [
         'state-transition' => [
             'key' => 'state-transition',
@@ -30,10 +33,10 @@ return [
             'description_key' => 'labs.inventory_capacity.description',
             'group_key' => 'labs.inventory_capacity.group',
             'question_key' => 'labs.inventory_capacity.question',
-            'implemented' => false,
-            'default_enabled' => false,
+            'implemented' => true,
+            'default_enabled' => true,
             'toggleable' => true,
-            'route_names' => ['labs.show'],
+            'route_names' => ['labs.inventory-capacity.index'],
         ],
     ],
 ];
